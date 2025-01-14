@@ -2,7 +2,7 @@
   "name": "jecris_app",
   "version": "1.0.0",
   "description": "Une application dédiée au écrivain amateurs, mais aussi pour les lecteurs ambitieux.",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "dev:client": "pnpm --filter jecris_app-client dev",
     "dev:server": "pnpm --filter jecris_app-server dev",
@@ -26,7 +26,7 @@
     "Drizzle"
   ],
   "author": "Mazlum Morcicek",
-  "license": "MIT",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Mazlum123/jecris_app/issues"
   },
