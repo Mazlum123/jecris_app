@@ -10,3 +10,15 @@ export const getUsers = async (req: Request, res: Response) => {
         res.status(500).json({ error: "Erreur lors de la récupération des utilisateurs." });
     }
 };
+
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ error: "Utilisateur non authentifié" });
+            return;
+        }
+        res.status(200).json(req.user);
+    } catch (error) {
+        res.status(500).json({ error: "Erreur lors de la récupération de l'utilisateur." });
+    }
+};
