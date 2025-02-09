@@ -16,6 +16,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^22.13.1",
     "nodemon": "^3.1.9",
     "tsx": "^4.8.0",
@@ -27,6 +28,7 @@
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.2",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1",
     "postgres": "^3.4.5"
   }
