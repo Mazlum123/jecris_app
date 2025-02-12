@@ -1,4 +1,4 @@
-import "./types/express.d.js";
+import "./types/express";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
