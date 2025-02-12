@@ -1,11 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-// declare module "express" {
-//     interface Request {
-//         user?: { id: number; email: string };
-//     }
-// }
+declare global {
+    namespace Express {
+      interface Request {
+        user?: {
+          id: number;
+          email: string;
+        };
+      }
+    }
+  }
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
