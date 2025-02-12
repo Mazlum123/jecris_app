@@ -1,5 +1,5 @@
 import request from "supertest";
-import { app } from "../server.js";
+import { app, server } from "../server.js";
 import { db } from "../config/db.js";
 import jwt from "jsonwebtoken";
 
@@ -37,9 +37,22 @@ describe("User Controller", () => {
         const res = await request(app)
             .get("/api/users")
             .set("Authorization", `Bearer ${token}`);
-    
+
         expect(res.status).toBe(200);
         expect(res.body).toBeInstanceOf(Array);
     });
-    
+
+});
+
+afterAll(async () => {
+    try {
+        if (db.$client) {
+            await db.$client.end();
+        }
+        await new Promise<void>((resolve, reject) => {
+            server.close((err) => (err ? reject(err) : resolve()));
+        });
+    } catch (error) {
+        console.error("🚨 Erreur lors de la fermeture du serveur :", error);
+    }
 });

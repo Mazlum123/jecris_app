@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-// Ça informe TypeScript que user sera une propriété possible sur Request.
-declare module "express" {
-    interface Request {
-        user?: { id: number; email: string };
-    }
-}
+// declare module "express" {
+//     interface Request {
+//         user?: { id: number; email: string };
+//     }
+// }
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;

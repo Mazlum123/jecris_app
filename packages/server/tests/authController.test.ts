@@ -67,9 +67,14 @@ describe("Auth Controller", () => {
 });
 
 afterAll(async () => {
-    if (db.$client) {
-        await db.$client.end().catch((err) => console.error("Erreur lors de la fermeture de la BDD :", err));
+    try {
+        if (db.$client) {
+            await db.$client.end();
+        }
+        await new Promise<void>((resolve, reject) => {
+            server.close((err) => (err ? reject(err) : resolve()));
+        });
+    } catch (error) {
+        console.error("🚨 Erreur lors de la fermeture du serveur :", error);
     }
-
-    await new Promise<void>((resolve) => server.close(() => resolve()));
 });
