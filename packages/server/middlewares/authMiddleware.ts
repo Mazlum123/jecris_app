@@ -29,3 +29,23 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         res.status(403).json({ error: "Token invalide." });
     }
 };
+
+export const verifyBookOwnership = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const { bookId } = req.params;
+
+    if (!userId) {
+        return res.status(401).json({ error: "Non authentifié." });
+    }
+
+    const bookOwned = await db.select().from(userBooks).where(
+        eq(userBooks.userId, userId),
+        eq(userBooks.bookId, parseInt(bookId))
+    );
+
+    if (!bookOwned.length) {
+        return res.status(403).json({ error: "Vous n'avez pas acheté ce livre." });
+    }
+
+    next();
+};

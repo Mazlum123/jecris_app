@@ -5,5 +5,6 @@ const router = Router();
 
 router.get("/", getAllBooks);
 router.post("/", addBook);
+router.get("/read/:bookId/:pageNumber", authenticateToken, verifyBookOwnership, readBook);
 
 export default router;
