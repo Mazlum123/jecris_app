@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { db } from "../config/db.js";
+import { userBooks } from "../models/userBooksModel.js";
+import { and, eq } from "drizzle-orm";
 
 declare global {
     namespace Express {
@@ -30,22 +33,28 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     }
 };
 
-export const verifyBookOwnership = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.id;
-    const { bookId } = req.params;
+export const verifyBookOwnership = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const { bookId } = req.params;
 
-    if (!userId) {
-        return res.status(401).json({ error: "Non authentifié." });
+        if (!userId) {
+            res.status(401).json({ error: "Non authentifié." });
+            return;
+        }
+
+        const bookOwned = await db.select().from(userBooks).where(
+            and(eq(userBooks.userId, userId), eq(userBooks.bookId, parseInt(bookId!)))
+        );
+
+        if (!bookOwned.length) {
+            res.status(403).json({ error: "Vous n'avez pas acheté ce livre." });
+            return;
+        }
+
+        return next();
+    } catch (error) {
+        console.error("Erreur middleware `verifyBookOwnership` :", error);
+        res.status(500).json({ error: "Erreur interne du serveur." });
     }
-
-    const bookOwned = await db.select().from(userBooks).where(
-        eq(userBooks.userId, userId),
-        eq(userBooks.bookId, parseInt(bookId))
-    );
-
-    if (!bookOwned.length) {
-        return res.status(403).json({ error: "Vous n'avez pas acheté ce livre." });
-    }
-
-    next();
 };

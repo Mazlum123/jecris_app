@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 import bookRoutes from "./routes/bookRoutes.js";
 import readRoutes from "./routes/readRoutes.js";
 import userBooksRoutes from "./routes/userBooksRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/read", readRoutes);
 app.use("/api/user-books", userBooksRoutes);
+app.use("/api/payment", paymentRoutes);
 app.use(errorHandler);
 
 // Route de test
