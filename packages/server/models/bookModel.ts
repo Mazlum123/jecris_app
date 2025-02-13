@@ -4,7 +4,7 @@ import { pgTable, serial, text, integer, timestamp, numeric } from "drizzle-orm/
 export const books = pgTable("books", {
     id: serial("id").primaryKey(),
     title: text("title").notNull(),
-    description: text("description"),
+    description: text("description").default(""),
     content: text("content").notNull(),
     authorId: integer("author_id").notNull(),
     image: text("image"),

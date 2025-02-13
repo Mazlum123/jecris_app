@@ -15,6 +15,20 @@
       "when": 1739379119306,
       "tag": "0001_bouncy_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1739451112787,
+      "tag": "0002_fast_shriek",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1739453580688,
+      "tag": "0003_reflective_proteus",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { pgTable, unique, serial, text, timestamp, integer } from "drizzle-orm/pg-core"
+import { pgTable, unique, serial, text, timestamp, integer, numeric } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
@@ -17,4 +17,25 @@ export const books = pgTable("books", {
 	title: text().notNull(),
 	authorId: integer("author_id").notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+	content: text().notNull(),
+	image: text(),
+	price: numeric().default('0'),
+	description: text().default(').notNull(),
+});
+
+export const userWrittenBooks = pgTable("user_written_books", {
+	id: serial().primaryKey().notNull(),
+	userId: integer("user_id").notNull(),
+	title: text().notNull(),
+	content: text(),
+	status: text().default('draft'),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+});
+
+export const userBooks = pgTable("user_books", {
+	id: serial().primaryKey().notNull(),
+	userId: integer("user_id").notNull(),
+	bookId: integer("book_id").notNull(),
+	addedAt: timestamp("added_at", { mode: 'string' }).defaultNow(),
+	lastPageRead: integer().default(1),
 });

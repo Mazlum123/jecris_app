@@ -3,14 +3,14 @@ import jwt from "jsonwebtoken";
 
 declare global {
     namespace Express {
-      interface Request {
-        user?: {
-          id: number;
-          email: string;
-        };
-      }
+        interface Request {
+            user?: {
+                id: number;
+                email: string;
+            };
+        }
     }
-  }
+}
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;

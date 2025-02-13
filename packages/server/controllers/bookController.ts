@@ -18,7 +18,7 @@ export const getAllBooks = async (req: Request, res: Response) => {
 // Ça évite à TypeScript de penser qu'on retourne une Promise<Response>.
 export const addBook: RequestHandler = async (req, res) => {
     try {
-        const { title, authorId } = req.body;
+        const { title, description, authorId } = req.body;  // Ajout de description
 
         if (!title || !authorId) {
             res.status(400).json({ error: "Le titre et l'ID de l'auteur sont requis." });
@@ -27,6 +27,7 @@ export const addBook: RequestHandler = async (req, res) => {
 
         const newBook = await db.insert(books).values({
             title,
+            description: description !== undefined ? description : "",
             content: "Contenu par défaut",
             authorId,
         }).returning();
@@ -35,5 +36,29 @@ export const addBook: RequestHandler = async (req, res) => {
     } catch (error) {
         console.error("🚨 ERREUR SQL :", error);
         res.status(500).json({ error: "Erreur lors de l'ajout du livre." });
+    }
+};
+
+export const createBook = async (req: Request, res: Response) => {
+    try {
+        const { title, description, content, authorId, price, image } = req.body;
+
+        if (!title || !content || !authorId) {
+            return res.status(400).json({ error: "Champs obligatoires manquants." });
+        }
+
+        const newBook = await db.insert(books).values({
+            title,
+            description: description !== undefined ? description : "",
+            content,
+            authorId,
+            price: price ?? "0",
+            image
+        }).returning();
+
+        res.status(201).json(newBook);
+    } catch (error) {
+        console.error("🚨 Erreur lors de la création du livre :", error);
+        res.status(500).json({ error: "Erreur lors de la création du livre." });
     }
 };
