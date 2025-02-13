@@ -11,6 +11,11 @@ import { errorHandler } from "./middlewares/errorMiddleware.js";
 
 dotenv.config();
 
+console.log("🔍 CLIENT_URL:", process.env.CLIENT_URL);
+console.log("🔍 DATABASE_URL:", process.env.DATABASE_URL ? "Loaded" : "Not Loaded");
+console.log("🔍 STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "Loaded" : "Not Loaded");
+console.log("🔍 STRIPE_WEBHOOK_SECRET:", process.env.STRIPE_WEBHOOK_SECRET ? "Loaded" : "Not Loaded");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
