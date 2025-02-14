@@ -18,6 +18,7 @@ console.log("🔍 STRIPE_WEBHOOK_SECRET:", process.env.STRIPE_WEBHOOK_SECRET ? "
 
 const app = express();
 app.use(cors());
+app.post("/api/webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 
 // Routes API

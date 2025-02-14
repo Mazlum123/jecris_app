@@ -16,12 +16,14 @@ export const createPayment = async (req: Request, res: Response): Promise<void> 
         }
 
         const book = await db.select().from(books).where(eq(books.id, bookId));
+
+        console.log("📖 Prix du livre récupéré:", book[0]?.price);
+
         if (!book.length || book[0].price === null || book[0].price === undefined) {
             res.status(404).json({ error: "Livre non trouvé ou prix invalide." });
             return;
         }
 
-        // ✅ Correction : S'assurer que CLIENT_URL est bien défini
         const clientUrl = process.env.CLIENT_URL ?? "http://localhost:3000";
 
         const session = await stripe.checkout.sessions.create({
@@ -32,7 +34,7 @@ export const createPayment = async (req: Request, res: Response): Promise<void> 
                         currency: "eur",
                         product_data: {
                             name: book[0].title,
-                            description: book[0].description || "Aucune description disponible", // ✅ Empêche la description vide
+                            description: book[0].description || "Aucune description disponible",
                         },
                         unit_amount: Math.round(Number(book[0].price) * 100),
                     },
@@ -40,8 +42,8 @@ export const createPayment = async (req: Request, res: Response): Promise<void> 
                 },
             ],
             mode: "payment",
-            success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}`, // ✅ Correction ici
-            cancel_url: `${clientUrl}/cancel`, // ✅ Correction ici
+            success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${clientUrl}/cancel`,
             metadata: {
                 userId: userId.toString(),
                 bookId: bookId.toString(),
@@ -76,6 +78,8 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
             const session = event.data.object;
             const userId = session.metadata?.userId;
             const bookId = session.metadata?.bookId;
+
+            console.log(session.metadata);
 
             if (userId && bookId) {
                 await db.insert(userBooks).values({
