@@ -1,8 +1,12 @@
 import { Router } from "express";
-import express from "express";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
-import { createPayment, handleWebhook } from "../controllers/paymentController.js";
+import { createPayment, handleWebhook, paymentSuccess, paymentCancel } from "../controllers/paymentController.js";
 const router = Router();
-router.post("/", authenticateToken, createPayment);
-router.post("/webhook", express.raw({ type: "application/json" }), handleWebhook);
+// ✅ Route de paiement protégée par authentification
+router.post("/session", authenticateToken, createPayment);
+// ✅ Webhook Stripe doit recevoir un raw body
+router.post("/webhook", handleWebhook);
+// ✅ Routes pour redirection après paiement
+router.get("/success", paymentSuccess);
+router.get("/cancel", paymentCancel);
 export default router;

@@ -1,8 +1,8 @@
 {
-  "schema": "./models/*.ts",
-  "out": "./drizzle",
+  "schema": "./config/schema.ts",
+  "out": "./drizzle/migrations",
   "dialect": "postgresql",
   "dbCredentials": {
-      "url": "postgresql://neondb_owner:npg_jF4l3rcSkWya@ep-bitter-flower-a9nx8khi.gwc.azure.neon.tech/neondb?sslmode=require"
+    "url": "postgresql://neondb_owner:npg_3QMVruthGKs4@ep-dark-mud-a8hrtc90.eastus2.azure.neon.tech/neondb?sslmode=require"
   }
 }

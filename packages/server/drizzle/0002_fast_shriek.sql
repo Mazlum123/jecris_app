@@ -1,1 +1,0 @@
-ALTER TABLE "user_books" ADD COLUMN "lastPageRead" integer DEFAULT 1;
