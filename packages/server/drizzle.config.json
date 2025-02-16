@@ -3,10 +3,6 @@
   "out": "./drizzle",
   "dialect": "postgresql",
   "dbCredentials": {
-    "host": "ep-dark-mud-a8hrtc90.eastus2.azure.neon.tech",
-    "user": "neondb_owner",
-    "password": "npg_3QMVruthGKs4",
-    "database": "neondb",
-    "ssl": true
+    "connectionString": "${DATABASE_URL}"
   }
 }
