@@ -2,7 +2,11 @@
   "schema": "./config/schema.ts",
   "out": "./drizzle/migrations",
   "dialect": "postgresql",
-  "dbCredentials": {
-    "url": "postgresql://neondb_owner:npg_3QMVruthGKs4@ep-dark-mud-a8hrtc90.eastus2.azure.neon.tech/neondb?sslmode=require"
-  }
+"dbCredentials": {
+  "host": "ep-dark-mud-a8hrtc90.eastus2.azure.neon.tech",
+  "user": "neondb_owner",
+  "password": "npg_3QMVruthGKs4",
+  "database": "neondb",
+  "ssl": true
+}
 }
