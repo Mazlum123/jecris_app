@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import { api } from "./api/api";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+interface Book {
+  id: number;
+  title: string;
+  description: string;
 }
 
-export default App
+const App = () => {
+  const [books, setBooks] = useState<Book[]>([]);
+
+  useEffect(() => {
+    api.get<Book[]>("/books")
+      .then((response) => {
+        console.log("📚 Livres reçus :", response.data);
+        setBooks(response.data);
+      })
+      .catch((error) => console.error("🚨 Erreur API :", error));
+  }, []);
+
+  return (
+    <div>
+      <h1>Bienvenue sur Jecris !</h1>
+      <ul>
+        {books.map((book) => (
+          <li key={book.id}>
+            <strong>{book.title}</strong> - {book.description}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default App;
