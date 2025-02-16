@@ -5,7 +5,6 @@ import { books } from "../models/bookModel.js";
 import { cart } from "../models/cartModel.js";
 import { payments } from "../models/paymentModel.js";
 import { eq, inArray, and } from "drizzle-orm";
-// ✅ Création de paiement avec Stripe
 export const createPayment = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -15,6 +14,7 @@ export const createPayment = async (req, res) => {
             return;
         }
         console.log(`✅ Utilisateur ${userId} demande un paiement.`);
+        // 🔍 Récupérer les livres dans le panier de l'utilisateur
         const cartItems = await db
             .select({ id: books.id, title: books.title, price: books.price })
             .from(cart)
@@ -26,8 +26,15 @@ export const createPayment = async (req, res) => {
             res.status(400).json({ error: "Le panier est vide." });
             return;
         }
-        const bookIds = cartItems.map((book) => book.id);
+        const bookIds = cartItems.map(book => book.id);
         console.log("📚 Livres à acheter:", bookIds);
+        // ✅ Vérifier la structure du `metadata`
+        const metadata = {
+            userId: userId.toString(),
+            bookIds: JSON.stringify(bookIds) // 🔍 Convertir `bookIds` en JSON propre
+        };
+        console.log("📦 Vérification - Metadata envoyée à Stripe:", metadata);
+        // 🔹 Création de la session Stripe
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: cartItems.map(book => ({
@@ -39,14 +46,12 @@ export const createPayment = async (req, res) => {
                 quantity: 1,
             })),
             mode: "payment",
-            success_url: "http://localhost:5000/api/payment/success",
-            cancel_url: "http://localhost:5000/api/payment/cancel",
-            metadata: {
-                userId: userId.toString(),
-                bookIds: JSON.stringify(bookIds)
-            },
+            success_url: `${process.env.CLIENT_URL}/success`,
+            cancel_url: `${process.env.CLIENT_URL}/cancel`,
+            metadata: metadata // ✅ S'assurer que le `metadata` est bien structuré
         });
         console.log(`✅ Session Stripe créée: ${session.id}`);
+        console.log("📦 Metadata envoyée à Stripe:", session.metadata);
         res.json({ url: session.url });
     }
     catch (error) {
@@ -64,10 +69,16 @@ export const handleWebhook = async (req, res) => {
             res.status(400).send("Signature Stripe manquante.");
             return;
         }
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+            console.error("❌ Clé secrète du webhook Stripe manquante.");
+            res.status(500).json({ error: "Clé secrète du webhook Stripe manquante." });
+            return;
+        }
         let event;
         try {
             console.log("🔍 Vérification de la signature avec la clé webhook...");
-            event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+            event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
             console.log("✅ Signature Stripe validée !");
         }
         catch (err) {
@@ -78,60 +89,69 @@ export const handleWebhook = async (req, res) => {
         console.log("🔔 Type d'événement reçu:", event.type);
         if (event.type === "checkout.session.completed") {
             const session = event.data.object;
-            console.log("📦 Metadata Stripe:", session.metadata);
-            const userId = session.metadata?.userId ?? "undefined";
-            const bookIdsString = session.metadata?.bookIds ?? "[]";
-            console.log(`📌 userId reçu: ${userId}`);
-            console.log(`📌 bookIds reçus: ${bookIdsString}`);
-            if (userId === "undefined" || bookIdsString === "[]") {
+            console.log("📦 Metadata Stripe complète :", session.metadata);
+            if (!session.metadata?.userId || !session.metadata?.bookIds) {
                 console.error("❌ userId ou bookIds manquants !");
                 res.status(400).json({ error: "userId ou bookIds manquants." });
                 return;
             }
-            const bookIds = JSON.parse(bookIdsString);
-            if (bookIds.length === 0) {
+            console.log("🔍 userId reçu :", session.metadata?.userId);
+            console.log("🔍 bookIds reçus :", session.metadata?.bookIds);
+            const userId = session.metadata.userId;
+            let bookIds;
+            try {
+                bookIds = JSON.parse(session.metadata.bookIds);
+            }
+            catch (error) {
+                console.error("❌ Erreur parsing des `bookIds`:", error);
+                res.status(400).json({ error: "Erreur parsing bookIds." });
+                return;
+            }
+            console.log(`📌 userId reçu: ${userId}`);
+            console.log(`📌 bookIds reçus (après parsing):`, bookIds);
+            if (!Array.isArray(bookIds) || bookIds.length === 0) {
                 console.error("❌ Aucun livre trouvé dans la transaction !");
                 res.status(400).json({ error: "Aucun livre trouvé dans la transaction." });
                 return;
             }
-            console.log(`📌 Vérification si le paiement a déjà été traité...`);
             const existingPayment = await db.select().from(payments).where(eq(payments.paymentId, event.id));
             if (existingPayment.length > 0) {
-                console.log("🚨 Paiement déjà traité, on ignore.");
+                console.log("🚨 Paiement déjà enregistré.");
                 res.status(200).json({ message: "Paiement déjà enregistré." });
                 return;
             }
-            console.log(`📌 Ajout des livres ${bookIds} à la bibliothèque de l'utilisateur ${userId}`);
+            // 📚 Vérifier que l'utilisateur ne possède pas déjà ces livres
             const alreadyOwned = await db
                 .select()
                 .from(userBooks)
                 .where(and(eq(userBooks.userId, parseInt(userId)), inArray(userBooks.bookId, bookIds)));
-            if (alreadyOwned.length > 0) {
+            const booksToAdd = bookIds.filter(bookId => !alreadyOwned.some(owned => owned.bookId === bookId));
+            if (booksToAdd.length === 0) {
                 console.log("🚨 L'utilisateur possède déjà ces livres, on annule.");
                 res.status(200).json({ message: "Livres déjà ajoutés." });
                 return;
             }
             // 📚 Ajouter les livres à la bibliothèque de l'utilisateur
-            const insertResult = await db.insert(userBooks).values(bookIds.map((bookId) => ({
+            const insertResult = await db.insert(userBooks).values(booksToAdd.map((bookId) => ({
                 userId: parseInt(userId),
                 bookId,
                 lastPageRead: 1,
             }))).returning();
             console.log("✅ Livres ajoutés à la bibliothèque :", insertResult);
             // 🗑 Vider le panier après l'achat
-            const deleteResult = await db.delete(cart).where(and(eq(cart.userId, parseInt(userId)), inArray(cart.bookId, bookIds))).returning();
-            console.log("✅ Panier vidé :", deleteResult);
-            // 📝 Marquer le paiement comme traité
+            await db.delete(cart).where(and(eq(cart.userId, parseInt(userId)), inArray(cart.bookId, bookIds)));
+            // 📝 Enregistrer le paiement
             await db.insert(payments).values({
                 paymentId: event.id,
                 userId: parseInt(userId),
                 amount: String(session.amount_total ?? "0"),
             });
-            console.log(`📚 ${bookIds.length} livres ajoutés à la bibliothèque de l'utilisateur ${userId}`);
+            console.log(`📚 ${booksToAdd.length} livres ajoutés à la bibliothèque de l'utilisateur ${userId}`);
             res.json({ message: "Paiement validé, livres ajoutés !" });
-            return;
         }
-        res.json({ received: true });
+        else {
+            res.json({ received: true });
+        }
     }
     catch (error) {
         console.error("❌ Erreur Webhook:", error);

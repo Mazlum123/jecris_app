@@ -42,7 +42,7 @@ export const createPayment = async (req: Request, res: Response): Promise<void> 
             bookIds: JSON.stringify(bookIds) // 🔍 Convertir `bookIds` en JSON propre
         };
 
-        console.log("📦 Vérification - Metadata envoyée à Stripe:", metadata);
+        console.log("📦 Vérification - Metadata envoyée à Stripe AVANT session:", metadata);
 
         // 🔹 Création de la session Stripe
         const session = await stripe.checkout.sessions.create({
@@ -108,6 +108,8 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
         if (event.type === "checkout.session.completed") {
             const session = event.data.object;
             console.log("📦 Metadata Stripe complète :", session.metadata);
+            console.log("🔍 Avant parsing : bookIds =", session.metadata?.bookIds);
+
 
             if (!session.metadata?.userId || !session.metadata?.bookIds) {
                 console.error("❌ userId ou bookIds manquants !");
@@ -123,6 +125,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 
             try {
                 bookIds = JSON.parse(session.metadata.bookIds) as number[];
+                console.log("✅ Après parsing : bookIds =", bookIds);
             } catch (error) {
                 console.error("❌ Erreur parsing des `bookIds`:", error);
                 res.status(400).json({ error: "Erreur parsing bookIds." });

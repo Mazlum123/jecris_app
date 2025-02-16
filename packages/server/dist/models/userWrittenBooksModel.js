@@ -3,6 +3,7 @@ import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
 export const userWrittenBooks = pgTable("user_written_books", {
     id: serial("id").primaryKey(),
     userId: integer("user_id").notNull(),
+    bookId: integer("book_id").notNull(),
     title: text("title").notNull(),
     content: text("content"),
     status: text("status").default("draft"),
