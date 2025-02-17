@@ -33,12 +33,14 @@ export const login = async (req: Request, res: Response) => {
             { expiresIn: "1h" }
         );
 
-        res.status(200).json({ message: "Connexion réussie !", token });
+        // ✅ Ajout du username dans la réponse
+        res.status(200).json({ message: "Connexion réussie !", token, username: user.email });
+
     } catch (error) {
+        console.error("Erreur lors de la connexion :", error);
         res.status(500).json({ error: "Erreur lors de la connexion." });
     }
 };
-
 
 export const register = async (req: Request, res: Response) => {
     try {
@@ -57,4 +59,9 @@ export const register = async (req: Request, res: Response) => {
     } catch (error) {
         res.status(500).json({ error: "Erreur lors de l'inscription." });
     }
+};
+
+export const logout = async (req: Request, res: Response) => {
+    res.clearCookie("token");
+    return res.status(200).json({ message: "Déconnexion réussie !" });
 };

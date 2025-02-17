@@ -11,6 +11,6 @@ import { authors } from "../models/authorModel.js";
 dotenv.config();
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
-export const db = drizzle(sql, { schema: { users, books, userBooks, cart, payments, authors } }); // ✅ Ajout ici aussi
+export const db = drizzle(sql, { schema: { users, books, userBooks, cart, payments, authors } });
 
 console.log("✅ Connexion à PostgreSQL initialisée...");

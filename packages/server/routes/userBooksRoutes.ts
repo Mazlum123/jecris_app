@@ -6,6 +6,6 @@ const router = Router();
 
 router.post("/", authenticateToken, addBookToLibrary);
 router.get("/", authenticateToken, getUserBooks);
-router.delete("/", authenticateToken, removeBookFromLibrary);
+router.delete("/:bookId", authenticateToken, removeBookFromLibrary);
 
 export default router;

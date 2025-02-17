@@ -15,6 +15,29 @@ export const getAllBooks = async (req: Request, res: Response) => {
     }
 };
 
+export const getBookById = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const bookId = parseInt(req.params.bookId, 10);
+
+        if (isNaN(bookId)) {
+            res.status(400).json({ error: "Book ID invalide." });
+            return;
+        }
+
+        const book = await db.select().from(books).where(eq(books.id, bookId)).limit(1);
+
+        if (!book.length) {
+            res.status(404).json({ error: "Livre non trouvé." });
+            return;
+        }
+
+        res.status(200).json(book[0]);
+    } catch (error) {
+        console.error("❌ Erreur récupération livre :", error);
+        res.status(500).json({ error: "Erreur serveur lors de la récupération du livre." });
+    }
+};
+
 // ✅ Ajout d'un livre avec authorId (⚠️ Ancienne méthode, pas utilisée si on gère `authorName`)
 export const addBook: RequestHandler = async (req, res) => {
     try {
@@ -84,5 +107,57 @@ export const createBook = async (req: Request, res: Response): Promise<void> => 
     } catch (error) {
         console.error("❌ Erreur lors de la création du livre :", error);
         res.status(500).json({ error: "Erreur interne du serveur." });
+    }
+};
+
+export const updateBook = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const bookId = parseInt(req.params.bookId, 10);
+        const { title, description, price } = req.body;
+
+        if (isNaN(bookId)) {
+            res.status(400).json({ error: "Book ID invalide." });
+            return;
+        }
+
+        const updatedBook = await db.update(books)
+            .set({ title, description, price })
+            .where(eq(books.id, bookId))
+            .returning();
+
+        if (!updatedBook.length) {
+            res.status(404).json({ error: "Livre non trouvé." });
+            return;
+        }
+
+        res.status(200).json({ message: "Livre mis à jour.", book: updatedBook[0] });
+    } catch (error) {
+        console.error("❌ Erreur mise à jour livre :", error);
+        res.status(500).json({ error: "Erreur lors de la mise à jour du livre." });
+    }
+};
+
+export const deleteBook = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const bookId = parseInt(req.params.bookId, 10);
+
+        if (isNaN(bookId)) {
+            res.status(400).json({ error: "Book ID invalide." });
+            return;
+        }
+
+        const deletedBook = await db.delete(books)
+            .where(eq(books.id, bookId))
+            .returning();
+
+        if (!deletedBook.length) {
+            res.status(404).json({ error: "Livre non trouvé." });
+            return;
+        }
+
+        res.status(200).json({ message: "Livre supprimé avec succès." });
+    } catch (error) {
+        console.error("❌ Erreur suppression livre :", error);
+        res.status(500).json({ error: "Erreur lors de la suppression du livre." });
     }
 };

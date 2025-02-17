@@ -1,0 +1,41 @@
+@use "base/variables" as *;
+@use "base/mixins" as *;
+@use "base/global";
+@use "layouts/mainLayout";
+@use "components/navbar";
+
+@use "pages/home";
+@use "pages/bibliotheque";
+@use "pages/redirect";
+
+
+/* 🍱 Style Bento - Grille et cartes */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 40px;
+    justify-content: center;
+  }
+
+  .bento-card {
+    background: #a29090;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      font-size: 1.4rem;
+    }
+
+    p {
+      font-size: 1rem;
+      color: #333;
+    }
+  }

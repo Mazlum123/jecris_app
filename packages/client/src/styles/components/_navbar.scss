@@ -1,0 +1,35 @@
+@use "../base/variables" as *;
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: $navbar-bg;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    color: $primary-color;
+  }
+
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+
+    li {
+      display: inline;
+
+      a {
+        text-decoration: none;
+        color: $text-color;
+        font-weight: bold;
+
+        &:hover {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+}

@@ -70,26 +70,19 @@ export const getCart: RequestHandler = async (req, res): Promise<void> => {
 
 export const removeFromCart: RequestHandler = async (req, res): Promise<void> => {
     try {
-        let { bookId } = req.body;
         const userId = req.user?.id;
-
+        const bookId = parseInt(req.params.bookId, 10);
         if (!userId) {
             res.status(401).json({ error: "Utilisateur non authentifié." });
             return;
         }
 
-        // Convertir bookId en nombre si c'est une chaîne
-        if (typeof bookId === "string") {
-            bookId = parseInt(bookId, 10);
-        }
-
-        // Vérification après conversion
-        if (!bookId || isNaN(bookId)) {
+        if (isNaN(bookId)) {
             res.status(400).json({ error: "bookId est requis et doit être un nombre valide." });
             return;
         }
 
-        // Vérification si le livre est bien dans le panier
+        // Vérifier si le livre est bien dans le panier
         const existingEntry = await db
             .select()
             .from(cart)
@@ -108,6 +101,7 @@ export const removeFromCart: RequestHandler = async (req, res): Promise<void> =>
         res.status(500).json({ error: "Erreur lors de la suppression du livre du panier." });
     }
 };
+
 
 export const clearCart: RequestHandler = async (req, res): Promise<void> => {
     try {
