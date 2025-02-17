@@ -19,7 +19,14 @@ console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
 console.log(`🔗 Client URL : ${CLIENT_URL}`);
 
 const app = express();
-app.use(cors({ origin: CLIENT_URL })); // ✅ Accepter seulement l’URL définie
+
+// ✅ CORS : Acceptation multiple (Netlify + Railway + Localhost)
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:5173"];
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
 app.use(express.json());
 
 // ✅ Webhook Stripe doit utiliser `express.raw()`
