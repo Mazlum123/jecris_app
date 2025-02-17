@@ -13,7 +13,7 @@ import { errorHandler } from "./middlewares/errorMiddleware.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 4000; // ✅ Port dynamique
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173"; // ✅ URL dynamique
+const CLIENT_URL = process.env.CLIENT_URL || "https://jecris.netlify.app";
 
 console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
 console.log(`🔗 Client URL : ${CLIENT_URL}`);
