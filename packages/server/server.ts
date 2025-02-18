@@ -14,7 +14,7 @@ dotenv.config();
 
 const PORT = process.env.PORT || 4000; // ✅ Port dynamique
 const CLIENT_URL = process.env.CLIENT_URL || "https://jecris.netlify.app";
-const SERVER_URL = process.env.SERVER_URL || "https://jecrisapp-production.up.railway.app"; // Ajout
+const SERVER_URL = process.env.SERVER_URL || "https://jecrisapp-production.up.railway.app";
 
 
 console.log(`🚀 Serveur lancé sur ${SERVER_URL || `http://localhost:${PORT}`}`);
@@ -22,16 +22,14 @@ console.log(`🔗 Client URL : ${CLIENT_URL}`);
 
 const app = express();
 
+app.use(express.json());
 // ✅ CORS : Acceptation multiple (Netlify + Railway + Localhost)
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [CLIENT_URL, SERVER_URL, "http://localhost:5173"];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [CLIENT_URL];
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
-
-
-app.use(express.json());
 
 // ✅ Webhook Stripe doit utiliser `express.raw()`
 app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
