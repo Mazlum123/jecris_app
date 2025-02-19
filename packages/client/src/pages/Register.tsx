@@ -56,7 +56,7 @@ const Register = () => {
         setEmailError(null);
         setIsEmailValid(true);
       }
-    } catch (_) {
+    } catch {
       setEmailError("Erreur réseau lors de la vérification.");
       setIsEmailValid(false);
     }
@@ -128,7 +128,7 @@ const Register = () => {
         const data = await response.json();
         alert(data.error || "Erreur lors de l'inscription.");
       }
-    } catch (_) {
+    } catch {
       alert("Erreur réseau lors de l'inscription.");
     } finally {
       setIsSubmitting(false);
@@ -152,6 +152,22 @@ const Register = () => {
         <p>{password ? strengthLabels[passwordStrength - 1] || "Trop court" : ""}</p>
       </div>
     );
+  };
+
+  // Ouvre le popup Google OAuth
+  const handleGoogleSignup = () => {
+    const popup = window.open(
+      `${import.meta.env.VITE_API_BASE_URL}/auth/google`,
+      "googleSignup",
+      "width=500,height=600"
+    );
+
+    const interval = setInterval(() => {
+      if (popup && popup.closed) {
+        clearInterval(interval);
+        window.location.reload(); // Rafraîchir la page après la fermeture du popup
+      }
+    }, 500);
   };
 
   return (
@@ -194,7 +210,7 @@ const Register = () => {
 
       <div className="or-separator">ou</div>
 
-      <button className="google-btn" onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`}>
+      <button className="google-btn" onClick={handleGoogleSignup}>
         <img src="/google-icon.png" alt="Google Icon" />
         Inscrivez-vous avec Google
       </button>

@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import BookDetails from "./pages/BookDetails";
 import RedirectPage from "./pages/RedirectPage";
 import Register from "./pages/Register";
+import OauthSuccess from "./pages/OauthSuccess";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ const router = createBrowserRouter([
       { path: "/register", element: <Register /> },
       { path: "/books/:id", element: <BookDetails /> },
       { path: "/redirect", element: <RedirectPage /> },
+      { path: "/oauth-success", element: <OauthSuccess /> },
     ],
   },
 ]);
