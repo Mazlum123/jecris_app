@@ -119,6 +119,6 @@
     "models/**/*.ts",
     "routes/**/*.ts",
     "tests/**/*.ts"
-  ],
+, "tests/test-email.js"  ],
   "exclude": ["node_modules", "dist"]
 }

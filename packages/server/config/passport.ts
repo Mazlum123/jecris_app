@@ -7,15 +7,19 @@ import { eq } from "drizzle-orm";
 
 dotenv.config();
 
+// ✅ Vérifie que les variables d'environnement sont bien définies
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error("Google OAuth credentials are not set in environment variables.");
+}
+
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.NODE_ENV === "production"
-      ? "https://jecris.netlify.app/api/auth/google/callback"
-      : "http://localhost:4000/api/auth/google/callback",
-
+        ? "https://jecris-api.up.railway.app/api/auth/google/callback"
+        : "http://localhost:4000/api/auth/google/callback", 
     },
     async (
       accessToken: string,
@@ -24,14 +28,14 @@ passport.use(
       done: (error: any, user?: any) => void
     ) => {
       try {
-        // Vérifie si l'email est présent et valide
+        // ✅ Vérifie si l'email est présent
         const email = profile.emails?.[0]?.value || "";
 
         if (!email) {
           return done(new Error("Aucun email valide trouvé dans le profil Google."), false);
         }
 
-        // Recherche de l'utilisateur dans la base
+        // ✅ Recherche de l'utilisateur dans la base
         const existingUser = await db
           .select()
           .from(users)
@@ -43,7 +47,7 @@ passport.use(
         if (existingUser.length > 0) {
           user = existingUser[0];
         } else {
-          // Crée un nouvel utilisateur s'il n'existe pas
+          // ✅ Crée un nouvel utilisateur s'il n'existe pas
           const newUser = await db
             .insert(users)
             .values({
@@ -63,12 +67,12 @@ passport.use(
   )
 );
 
-// Sérialisation de l'utilisateur pour la session
+// ✅ Sérialisation de l'utilisateur pour la session
 passport.serializeUser((user: any, done) => {
   done(null, user.id);
 });
 
-// Désérialisation de l'utilisateur à partir de la session
+// ✅ Désérialisation de l'utilisateur à partir de la session
 passport.deserializeUser(async (id: number, done) => {
   try {
     const user = await db
