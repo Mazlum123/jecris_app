@@ -96,54 +96,84 @@ export const checkEmail = async (req: Request, res: Response) => {
 };
 
 export const handleGoogleAuth = async (req: Request, res: Response) => {
-    try {
-      const { email } = req.body;
-  
-      if (!email) {
-        return res.status(400).json({ error: "Email manquant." });
-      }
-  
-      // Vérifie si l'utilisateur existe déjà
-      let existingUser = await db.select().from(User).where(eq(User.email, email)).limit(1);
-      let user = existingUser[0];
-  
-      if (!user) {
-        // Crée un nouvel utilisateur
-        const newUser = await db.insert(User).values({
-          email,
-          password: "", // Pas de mot de passe pour les comptes Google
-        }).returning();
-  
-        user = newUser[0];
-  
-        // Génère un token pour définir un mot de passe
-        if (!process.env.JWT_SECRET) {
-          throw new Error("Clé JWT manquante dans .env");
-        }
-  
-        const token = jwt.sign(
-          { userId: user.id },
-          process.env.JWT_SECRET as string,
-          { expiresIn: "1h" }
-        );
-  
-        // Envoie l'email pour définir un mot de passe
-        await sendPasswordSetupEmail(user.email, token);
-      }
-  
-      // Génère un token JWT pour la session
-      const sessionToken = jwt.sign(
-        { id: user.id, email: user.email },
-        process.env.JWT_SECRET as string,
-        { expiresIn: "7d" }
-      );
-  
-      // Redirige vers le client avec le token
-      res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${sessionToken}&newUser=${!user.password}`);
-    } catch (error) {
-      console.error("Erreur dans handleGoogleAuth:", error);
-      res.status(500).json({ error: "Erreur lors de l'authentification Google." });
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email manquant." });
     }
+
+    let existingUsers = await db.select().from(users).where(eq(users.email, email));
+    let user = existingUsers[0];
+    let isNewUser = false;
+
+    if (!user) {
+      // Crée un nouvel utilisateur
+      const [newUser] = await db.insert(users).values({
+        email,
+        password: "", // Pas de mot de passe initial
+      }).returning();
+
+      user = newUser;
+      isNewUser = true;
+
+      // Génère un token pour définir un mot de passe
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
+
+      // Envoie l'email pour définir un mot de passe
+      await sendPasswordSetupEmail(user.email, token);
+    } else {
+      // Si l'utilisateur existe déjà via un autre moyen (non Google)
+      if (user.password) {
+        return res.status(400).json({ error: "Cet email est déjà utilisé. Veuillez vous connecter normalement." });
+      }
+    }
+
+    // Génère un token JWT pour la session
+    const sessionToken = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({
+      token: sessionToken,
+      isNewUser
+    });
+  } catch (error) {
+    console.error("Erreur dans handleGoogleAuth:", error);
+    res.status(500).json({ error: "Erreur lors de l'authentification Google." });
+  }
+};
+
+// Endpoint pour définir un mot de passe après authentification Google
+export const setPassword = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: 'Token et nouveau mot de passe requis.' });
+  }
+
+  try {
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    const userId = decoded.userId;
+
+    const usersFound = await db.select().from(users).where(eq(users.id, userId));
+    const user = usersFound[0];
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.id, userId));
+
+    return res.status(200).json({ message: 'Mot de passe défini avec succès.' });
+  } catch (error: any) {
+    console.error('Erreur lors de la définition du mot de passe:', error);
+    return res.status(400).json({ error: 'Lien expiré ou invalide.' });
+  }
 };
 
 export const logout = async (req: Request, res: Response) => {

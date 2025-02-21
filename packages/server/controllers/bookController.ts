@@ -7,11 +7,18 @@ import { eq } from "drizzle-orm";
 // ✅ Récupérer tous les livres
 export const getAllBooks = async (req: Request, res: Response) => {
     try {
-        const allBooks = await db.select().from(books);
-        res.status(200).json(allBooks);
+      const allBooks = await db.select().from(books);
+
+      // ✅ Ajoute un champ isFree en fonction du prix
+      const booksWithFreeFlag = allBooks.map((book) => ({
+        ...book,
+        isFree: parseFloat(book.price ?? "Prix inconnu") === 0,
+      }));
+
+      res.status(200).json(booksWithFreeFlag);
     } catch (error) {
-        console.error("🚨 ERREUR SQL :", error);
-        res.status(500).json({ error: "Erreur lors de la récupération des livres." });
+      console.error("🚨 ERREUR SQL :", error);
+      res.status(500).json({ error: "Erreur lors de la récupération des livres." });
     }
 };
 
@@ -39,7 +46,7 @@ export const getBookById = async (req: Request, res: Response): Promise<void> =>
 };
 
 // ✅ Ajout d'un livre avec authorId (⚠️ Ancienne méthode, pas utilisée si on gère `authorName`)
-export const addBook: RequestHandler = async (req, res) => {
+export const addBook: RequestHandler = async (req: Request, res: Response) => {
     try {
         const { title, description, authorId } = req.body;
 

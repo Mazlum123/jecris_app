@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import { useCart } from "../context/useCart";
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useAuth();
+  const { cartItems } = useCart();
 
   const handleLogout = () => {
     logout();
@@ -23,6 +25,7 @@ const Navbar = () => {
         ) : (
           <li><button onClick={handleLogout}>Déconnexion</button></li>
         )}
+        <li><Link to="/cart">Panier 🛒 ({cartItems.length})</Link></li>
       </ul>
     </nav>
   );

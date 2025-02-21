@@ -8,6 +8,7 @@ import BookDetails from "./pages/BookDetails";
 import RedirectPage from "./pages/RedirectPage";
 import Register from "./pages/Register";
 import OauthSuccess from "./pages/OauthSuccess";
+import Cart from "./components/Cart";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: "/books/:id", element: <BookDetails /> },
       { path: "/redirect", element: <RedirectPage /> },
       { path: "/oauth-success", element: <OauthSuccess /> },
+      { path: "/cart", element: <Cart /> },
     ],
   },
 ]);

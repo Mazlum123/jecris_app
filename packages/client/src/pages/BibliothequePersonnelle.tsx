@@ -9,32 +9,37 @@ interface Book {
 }
 
 const fetchUserBooks = async (): Promise<Book[]> => {
-  const response = await api.get("/user-books");
+  const token = localStorage.getItem("authToken"); // ✅ Récupère le token JWT
+
+  const response = await api.get("/user-books", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   return response.data;
 };
 
 const BibliothequePersonnelle = () => {
-  const { data, error, isLoading } = useQuery<Book[], Error>({
+  const { data: books, error, isLoading } = useQuery<Book[], Error>({
     queryKey: ["user-books"],
     queryFn: fetchUserBooks,
   });
 
-  // Assure que livresUtilisateur n'est jamais undefined
-  const livresUtilisateur = data || [];
-
   if (isLoading) return <p>Chargement...</p>;
-  if (error) return <p>Erreur lors de la récupération de vos livres.</p>;
+  if (error) return <p>Erreur lors de la récupération de votre bibliothèque.</p>;
 
   return (
     <div className="bibliotheque-container">
-      <h1>📖 Votre Bibliothèque Personnelle</h1>
-      {livresUtilisateur.length === 0 ? (
-        <p>Vous n'avez encore ajouté aucun livre.</p>
+      <h1>📖 Ma Bibliothèque Personnelle</h1>
+      {books?.length === 0 ? (
+        <p>Aucun livre dans votre bibliothèque.</p>
       ) : (
-        <div className="livres-list">
-          {livresUtilisateur.map((livre) => (
-            <div className="livre-card" key={livre.id}>
-              📖 {livre.title}
+        <div className="bento-grid">
+          {books?.map((book) => (
+            <div key={book.id} className="bento-card">
+              <h3>{book.title}</h3>
+              <p>{book.description}</p>
             </div>
           ))}
         </div>

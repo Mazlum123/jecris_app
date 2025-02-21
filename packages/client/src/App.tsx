@@ -6,22 +6,28 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Écouter les messages venant de la fenêtre pop-up OAuth
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
+      // Vérifie que le message provient bien du même domaine
+      if (event.origin !== window.location.origin) {
+        console.warn("Message reçu d'un domaine non autorisé");
+        return;
+      }
 
       const { token, isNewGoogleUser } = event.data;
 
       if (token) {
+        console.log("Token reçu :", token);
         localStorage.setItem("authToken", token); // Stocke le token
 
         if (isNewGoogleUser) {
-          // Redirige vers la page de définition du mot de passe
+          console.log("Nouvel utilisateur Google - redirection vers /set-password");
           navigate("/set-password");
         } else {
-          // Redirige vers la page d'accueil si l'utilisateur est déjà existant
-          window.location.reload();
+          console.log("Utilisateur existant - redirection vers /dashboard");
+          navigate("/dashboard");
         }
+      } else {
+        console.warn("Aucun token reçu depuis le message OAuth");
       }
     };
 
