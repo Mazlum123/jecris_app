@@ -1,14 +1,40 @@
-// 🎨 Définition des couleurs globales
-$background-color: #F5F5F5;
-$navbar-bg: #B5B19B;
-$text-color: #2C3E50;
-$primary-color: #3E606F;
-$secondary-color: #A3B18A;
-
-
-
-// 📏 Tailles
-$border-radius: 8px;
-
-// 🖋 Typographie
-$font-family: 'Roboto', sans-serif;
+:root {
+    // Couleurs
+    --primary-color: #3E606F;
+    --secondary-color: #A3B18A;
+    --accent-color: #588157;
+    
+    // Couleurs de fond
+    --bg-color: #F5F5F5;
+    --card-bg: #FFFFFF;
+    --navbar-bg: #B5B19B;
+    
+    // Couleurs de texte
+    --text-color: #2C3E50;
+    --title-color: #344E41;
+    --light-text: #FFFFFF;
+    
+    // Couleurs d'état
+    --error-color: #dc3545;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    
+    // Ombres
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --button-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+    // Espacements
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    // Border radius
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    
+    // Transitions
+    --transition-speed: 0.3s;
+  }

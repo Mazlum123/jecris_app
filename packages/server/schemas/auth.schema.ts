@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
+// Schema basique pour login
 export const loginSchema = z.object({
-  email: z.string().email('Email invalide'),
-  password: z.string().min(6, 'Mot de passe trop court')
+    email: z.string().email("Email invalide"),
+    password: z.string().min(1, "Mot de passe requis")
 });
 
-export const registerSchema = loginSchema.extend({
-  username: z.string().min(3, 'Nom d\'utilisateur trop court')
+// Schema basique pour register
+export const registerSchema = z.object({
+    email: z.string().email("Email invalide"),
+    password: z.string().min(6, "Le mot de passe doit faire au moins 6 caractères")
 });
-
-export type LoginInput = z.infer<typeof loginSchema>;
-export type RegisterInput = z.infer<typeof registerSchema>;

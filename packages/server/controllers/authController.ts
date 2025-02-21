@@ -19,14 +19,22 @@ export const login = async (req: Request, res: Response) => {
             .limit(1);
 
         if (existingUser.length === 0) {
-            return res.status(401).json({ error: "Email ou mot de passe incorrect." });
+            return res.status(401).json({
+                status: 'error',
+                message: "Email ou mot de passe incorrect.",
+                data: null
+            });
         }
 
         const user = existingUser[0];
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ error: "Email ou mot de passe incorrect." });
+            return res.status(401).json({
+                status: 'error',
+                message: "Email ou mot de passe incorrect.",
+                data: null
+            });
         }
 
         const token = jwt.sign(
@@ -35,12 +43,27 @@ export const login = async (req: Request, res: Response) => {
             { expiresIn: "1h" }
         );
 
-        // ✅ Ajout du username dans la réponse
-        res.status(200).json({ message: "Connexion réussie !", token, username: user.email });
+        res.status(200).json({
+            status: 'success',
+            message: "Connexion réussie !",
+            token, // pour la compatibilité
+            username: user.email, // pour la compatibilité
+            data: {
+                token,
+                user: {
+                    id: user.id,
+                    email: user.email
+                }
+            }
+        });
 
     } catch (error) {
         console.error("Erreur lors de la connexion :", error);
-        res.status(500).json({ error: "Erreur lors de la connexion." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de la connexion.",
+            data: null
+        });
     }
 };
 
@@ -50,133 +73,190 @@ export const register = async (req: Request, res: Response) => {
 
         const existingUser = await db.select().from(users).where(eq(users.email, email));
         if (existingUser.length > 0) {
-            return res.status(400).json({ error: "Cet email est déjà utilisé." });
+            return res.status(400).json({
+                status: 'error',
+                message: "Cet email est déjà utilisé.",
+                data: null
+            });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
         const newUser = await db.insert(users).values({ email, password: hashedPassword }).returning();
 
-        res.status(201).json({ message: "Utilisateur créé avec succès !", user: newUser });
+        res.status(201).json({
+            status: 'success',
+            message: "Utilisateur créé avec succès !",
+            data: {
+                user: newUser[0]
+            }
+        });
     } catch (error) {
-        res.status(500).json({ error: "Erreur lors de l'inscription." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de l'inscription.",
+            data: null
+        });
     }
 };
 
 export const checkEmail = async (req: Request, res: Response) => {
     try {
-      const { email } = req.body;
+        const { email } = req.body;
 
-      // Vérification si l'email est fourni
-      if (!email) {
-        return res.status(400).json({ error: "L'email est requis." });
-      }
+        if (!email) {
+            return res.status(400).json({
+                status: 'error',
+                message: "L'email est requis.",
+                data: null
+            });
+        }
 
-      // Vérifier la syntaxe de l'email
-      const isValidSyntax = validator.isEmail(email);
+        const isValidSyntax = validator.isEmail(email);
 
-      if (!isValidSyntax) {
-        return res.status(400).json({ error: "L'email n'est pas valide." });
-      }
+        if (!isValidSyntax) {
+            return res.status(400).json({
+                status: 'error',
+                message: "L'email n'est pas valide.",
+                data: null
+            });
+        }
 
-      // Vérification si l'email est déjà utilisé
-      const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+        const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+        const isAvailable = existingUser.length === 0;
 
-      const isAvailable = existingUser.length === 0;
-
-      // Réponse complète
-      return res.status(200).json({
-        exists: true, // Ici, on pourrait implémenter un service de vérification d'email si nécessaire
-        available: isAvailable,
-      });
+        return res.status(200).json({
+            status: 'success',
+            message: null,
+            data: {
+                exists: true,
+                available: isAvailable
+            }
+        });
     } catch (error) {
-      console.error("Erreur lors de la vérification de l'email :", error);
-      res.status(500).json({ error: "Erreur serveur lors de la vérification de l'email." });
+        console.error("Erreur lors de la vérification de l'email :", error);
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur serveur lors de la vérification de l'email.",
+            data: null
+        });
     }
 };
 
 export const handleGoogleAuth = async (req: Request, res: Response) => {
-  try {
-    const { email } = req.body;
+    try {
+        const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ error: "Email manquant." });
+        if (!email) {
+            return res.status(400).json({
+                status: 'error',
+                message: "Email manquant.",
+                data: null
+            });
+        }
+
+        let existingUsers = await db.select().from(users).where(eq(users.email, email));
+        let user = existingUsers[0];
+        let isNewUser = false;
+
+        if (!user) {
+            const [newUser] = await db.insert(users).values({
+                email,
+                password: "",
+            }).returning();
+
+            user = newUser;
+            isNewUser = true;
+
+            const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
+            await sendPasswordSetupEmail(user.email, token);
+        } else {
+            if (user.password) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: "Cet email est déjà utilisé. Veuillez vous connecter normalement.",
+                    data: null
+                });
+            }
+        }
+
+        const sessionToken = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.JWT_SECRET!,
+            { expiresIn: "7d" }
+        );
+
+        res.status(200).json({
+            status: 'success',
+            message: isNewUser ? "Compte créé avec succès" : "Connexion réussie",
+            token: sessionToken, // pour la compatibilité
+            data: {
+                token: sessionToken,
+                isNewUser,
+                user: {
+                    id: user.id,
+                    email: user.email
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Erreur dans handleGoogleAuth:", error);
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de l'authentification Google.",
+            data: null
+        });
     }
-
-    let existingUsers = await db.select().from(users).where(eq(users.email, email));
-    let user = existingUsers[0];
-    let isNewUser = false;
-
-    if (!user) {
-      // Crée un nouvel utilisateur
-      const [newUser] = await db.insert(users).values({
-        email,
-        password: "", // Pas de mot de passe initial
-      }).returning();
-
-      user = newUser;
-      isNewUser = true;
-
-      // Génère un token pour définir un mot de passe
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
-
-      // Envoie l'email pour définir un mot de passe
-      await sendPasswordSetupEmail(user.email, token);
-    } else {
-      // Si l'utilisateur existe déjà via un autre moyen (non Google)
-      if (user.password) {
-        return res.status(400).json({ error: "Cet email est déjà utilisé. Veuillez vous connecter normalement." });
-      }
-    }
-
-    // Génère un token JWT pour la session
-    const sessionToken = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
-    );
-
-    res.status(200).json({
-      token: sessionToken,
-      isNewUser
-    });
-  } catch (error) {
-    console.error("Erreur dans handleGoogleAuth:", error);
-    res.status(500).json({ error: "Erreur lors de l'authentification Google." });
-  }
 };
 
-// Endpoint pour définir un mot de passe après authentification Google
 export const setPassword = async (req: Request, res: Response) => {
-  const { token, newPassword } = req.body;
+    const { token, newPassword } = req.body;
 
-  if (!token || !newPassword) {
-    return res.status(400).json({ error: 'Token et nouveau mot de passe requis.' });
-  }
-
-  try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-    const userId = decoded.userId;
-
-    const usersFound = await db.select().from(users).where(eq(users.id, userId));
-    const user = usersFound[0];
-
-    if (!user) {
-      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    if (!token || !newPassword) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Token et nouveau mot de passe requis.',
+            data: null
+        });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    try {
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+        const userId = decoded.userId;
 
-    await db.update(users).set({ password: hashedPassword }).where(eq(users.id, userId));
+        const usersFound = await db.select().from(users).where(eq(users.id, userId));
+        const user = usersFound[0];
 
-    return res.status(200).json({ message: 'Mot de passe défini avec succès.' });
-  } catch (error: any) {
-    console.error('Erreur lors de la définition du mot de passe:', error);
-    return res.status(400).json({ error: 'Lien expiré ou invalide.' });
-  }
+        if (!user) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Utilisateur non trouvé.',
+                data: null
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.update(users).set({ password: hashedPassword }).where(eq(users.id, userId));
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Mot de passe défini avec succès.',
+            data: null
+        });
+    } catch (error: any) {
+        console.error('Erreur lors de la définition du mot de passe:', error);
+        return res.status(400).json({
+            status: 'error',
+            message: 'Lien expiré ou invalide.',
+            data: null
+        });
+    }
 };
 
 export const logout = async (req: Request, res: Response) => {
     res.clearCookie("token");
-    return res.status(200).json({ message: "Déconnexion réussie !" });
+    return res.status(200).json({
+        status: 'success',
+        message: "Déconnexion réussie !",
+        data: null
+    });
 };

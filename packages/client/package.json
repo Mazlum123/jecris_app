@@ -12,11 +12,14 @@
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
     "@tanstack/react-query": "^5.66.3",
+    "@types/react-router-dom": "^5.3.3",
     "axios": "^1.7.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5",
-    "sass": "^1.85.0"
+    "sass": "^1.85.0",
+    "zod": "^3.24.2",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

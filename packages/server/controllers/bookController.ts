@@ -4,21 +4,28 @@ import { books } from "../models/bookModel.js";
 import { authors } from "../models/authorModel.js";
 import { eq } from "drizzle-orm";
 
-// ✅ Récupérer tous les livres
 export const getAllBooks = async (req: Request, res: Response) => {
     try {
-      const allBooks = await db.select().from(books);
+        const allBooks = await db.select().from(books);
 
-      // ✅ Ajoute un champ isFree en fonction du prix
-      const booksWithFreeFlag = allBooks.map((book) => ({
-        ...book,
-        isFree: parseFloat(book.price ?? "Prix inconnu") === 0,
-      }));
+        const booksWithFreeFlag = allBooks.map((book) => ({
+            ...book,
+            isFree: parseFloat(book.price ?? "0") === 0,
+        }));
 
-      res.status(200).json(booksWithFreeFlag);
+        res.status(200).json({
+            status: 'success',
+            message: "Livres récupérés avec succès",
+            data: booksWithFreeFlag, // Le front attend directement le tableau
+            books: booksWithFreeFlag // Pour compatibilité si nécessaire
+        });
     } catch (error) {
-      console.error("🚨 ERREUR SQL :", error);
-      res.status(500).json({ error: "Erreur lors de la récupération des livres." });
+        console.error("🚨 ERREUR SQL :", error);
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de la récupération des livres.",
+            data: null
+        });
     }
 };
 
@@ -27,31 +34,51 @@ export const getBookById = async (req: Request, res: Response): Promise<void> =>
         const bookId = parseInt(req.params.bookId, 10);
 
         if (isNaN(bookId)) {
-            res.status(400).json({ error: "Book ID invalide." });
+            res.status(400).json({
+                status: 'error',
+                message: "Book ID invalide.",
+                data: null
+            });
             return;
         }
 
         const book = await db.select().from(books).where(eq(books.id, bookId)).limit(1);
 
         if (!book.length) {
-            res.status(404).json({ error: "Livre non trouvé." });
+            res.status(404).json({
+                status: 'error',
+                message: "Livre non trouvé.",
+                data: null
+            });
             return;
         }
 
-        res.status(200).json(book[0]);
+        res.status(200).json({
+            status: 'success',
+            message: "Livre trouvé",
+            data: book[0],
+            book: book[0] // Pour compatibilité si nécessaire
+        });
     } catch (error) {
         console.error("❌ Erreur récupération livre :", error);
-        res.status(500).json({ error: "Erreur serveur lors de la récupération du livre." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur serveur lors de la récupération du livre.",
+            data: null
+        });
     }
 };
 
-// ✅ Ajout d'un livre avec authorId (⚠️ Ancienne méthode, pas utilisée si on gère `authorName`)
 export const addBook: RequestHandler = async (req: Request, res: Response) => {
     try {
         const { title, description, authorId } = req.body;
 
         if (!title || !authorId) {
-            res.status(400).json({ error: "Le titre et l'ID de l'auteur sont requis." });
+            res.status(400).json({
+                status: 'error',
+                message: "Le titre et l'ID de l'auteur sont requis.",
+                data: null
+            });
             return;
         }
 
@@ -62,43 +89,51 @@ export const addBook: RequestHandler = async (req: Request, res: Response) => {
             authorId,
         }).returning();
 
-        res.status(201).json({ message: "Livre ajouté avec succès !", book: newBook[0] });
+        res.status(201).json({
+            status: 'success',
+            message: "Livre ajouté avec succès !",
+            data: newBook[0],
+            book: newBook[0] // Pour compatibilité si nécessaire
+        });
     } catch (error) {
         console.error("🚨 ERREUR SQL :", error);
-        res.status(500).json({ error: "Erreur lors de l'ajout du livre." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de l'ajout du livre.",
+            data: null
+        });
     }
 };
 
-// ✅ Création d'un livre avec `authorName`
 export const createBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const { title, authorName, content, image, price, description } = req.body;
 
         if (!title || !authorName) {
-            res.status(400).json({ error: "Le titre et le nom de l'auteur sont requis." });
+            res.status(400).json({
+                status: 'error',
+                message: "Le titre et le nom de l'auteur sont requis.",
+                data: null
+            });
             return;
         }
 
-        console.log(`📖 Création du livre: ${title} par ${authorName}`);
-
-        // 🔍 Vérifier si l'auteur existe déjà
         let author = await db.select().from(authors).where(eq(authors.name, authorName)).limit(1);
 
-        // ✍ Si l'auteur n'existe pas, on l'ajoute
         if (author.length === 0) {
-            console.log(`✍ Ajout de l'auteur: ${authorName}`);
             const insertedAuthors = await db.insert(authors).values({ name: authorName }).returning();
             author = insertedAuthors;
         }
 
         if (!author[0] || !author[0].id) {
-            res.status(500).json({ error: "Erreur lors de la récupération de l'auteur." });
+            res.status(500).json({
+                status: 'error',
+                message: "Erreur lors de la récupération de l'auteur.",
+                data: null
+            });
             return;
         }
 
-        console.log(`✅ Auteur ID récupéré: ${author[0].id}`);
-
-        // 📚 Ajouter le livre avec l'ID de l'auteur récupéré
         const newBook = await db.insert(books).values({
             title,
             authorId: author[0].id,
@@ -108,12 +143,20 @@ export const createBook = async (req: Request, res: Response): Promise<void> => 
             description: description || "",
         }).returning();
 
-        console.log("✅ Livre ajouté:", newBook);
-        res.status(201).json({ message: "Livre ajouté avec succès", book: newBook[0] });
+        res.status(201).json({
+            status: 'success',
+            message: "Livre ajouté avec succès",
+            data: newBook[0],
+            book: newBook[0] // Pour compatibilité si nécessaire
+        });
 
     } catch (error) {
         console.error("❌ Erreur lors de la création du livre :", error);
-        res.status(500).json({ error: "Erreur interne du serveur." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur interne du serveur.",
+            data: null
+        });
     }
 };
 
@@ -123,7 +166,11 @@ export const updateBook = async (req: Request, res: Response): Promise<void> => 
         const { title, description, price } = req.body;
 
         if (isNaN(bookId)) {
-            res.status(400).json({ error: "Book ID invalide." });
+            res.status(400).json({
+                status: 'error',
+                message: "Book ID invalide.",
+                data: null
+            });
             return;
         }
 
@@ -133,14 +180,27 @@ export const updateBook = async (req: Request, res: Response): Promise<void> => 
             .returning();
 
         if (!updatedBook.length) {
-            res.status(404).json({ error: "Livre non trouvé." });
+            res.status(404).json({
+                status: 'error',
+                message: "Livre non trouvé.",
+                data: null
+            });
             return;
         }
 
-        res.status(200).json({ message: "Livre mis à jour.", book: updatedBook[0] });
+        res.status(200).json({
+            status: 'success',
+            message: "Livre mis à jour.",
+            data: updatedBook[0],
+            book: updatedBook[0] // Pour compatibilité si nécessaire
+        });
     } catch (error) {
         console.error("❌ Erreur mise à jour livre :", error);
-        res.status(500).json({ error: "Erreur lors de la mise à jour du livre." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de la mise à jour du livre.",
+            data: null
+        });
     }
 };
 
@@ -149,7 +209,11 @@ export const deleteBook = async (req: Request, res: Response): Promise<void> => 
         const bookId = parseInt(req.params.bookId, 10);
 
         if (isNaN(bookId)) {
-            res.status(400).json({ error: "Book ID invalide." });
+            res.status(400).json({
+                status: 'error',
+                message: "Book ID invalide.",
+                data: null
+            });
             return;
         }
 
@@ -158,13 +222,25 @@ export const deleteBook = async (req: Request, res: Response): Promise<void> => 
             .returning();
 
         if (!deletedBook.length) {
-            res.status(404).json({ error: "Livre non trouvé." });
+            res.status(404).json({
+                status: 'error',
+                message: "Livre non trouvé.",
+                data: null
+            });
             return;
         }
 
-        res.status(200).json({ message: "Livre supprimé avec succès." });
+        res.status(200).json({
+            status: 'success',
+            message: "Livre supprimé avec succès.",
+            data: null
+        });
     } catch (error) {
         console.error("❌ Erreur suppression livre :", error);
-        res.status(500).json({ error: "Erreur lors de la suppression du livre." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de la suppression du livre.",
+            data: null
+        });
     }
 };

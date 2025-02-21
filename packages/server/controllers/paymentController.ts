@@ -11,40 +11,35 @@ export const createPayment = async (req: Request, res: Response): Promise<void> 
     try {
         const userId = req.user?.id;
         if (!userId) {
-            console.error("🚨 Erreur: Utilisateur non authentifié.");
-            res.status(401).json({ error: "Utilisateur non authentifié." });
+            res.status(401).json({
+                status: 'error',
+                message: "Utilisateur non authentifié.",
+                data: null
+            });
             return;
         }
 
-        console.log(`✅ Utilisateur ${userId} demande un paiement.`);
-
-        // 🔍 Récupérer les livres dans le panier de l'utilisateur
         const cartItems = await db
             .select({ id: books.id, title: books.title, price: books.price })
             .from(cart)
             .innerJoin(books, eq(cart.bookId, books.id))
             .where(eq(cart.userId, userId));
 
-        console.log("📦 Livres dans le panier:", cartItems);
-
         if (cartItems.length === 0) {
-            console.error("🚨 Panier vide !");
-            res.status(400).json({ error: "Le panier est vide." });
+            res.status(400).json({
+                status: 'error',
+                message: "Le panier est vide.",
+                data: null
+            });
             return;
         }
 
         const bookIds = cartItems.map(book => book.id);
-        console.log("📚 Livres à acheter:", bookIds);
-
-        // ✅ Vérifier la structure du `metadata`
         const metadata = {
             userId: userId.toString(),
-            bookIds: JSON.stringify(bookIds) // 🔍 Convertir `bookIds` en JSON propre
+            bookIds: JSON.stringify(bookIds)
         };
 
-        console.log("📦 Vérification - Metadata envoyée à Stripe AVANT session:", metadata);
-
-        // 🔹 Création de la session Stripe
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: cartItems.map(book => ({
@@ -58,97 +53,106 @@ export const createPayment = async (req: Request, res: Response): Promise<void> 
             mode: "payment",
             success_url: `${process.env.CLIENT_URL}/success`,
             cancel_url: `${process.env.CLIENT_URL}/cancel`,
-            metadata: metadata // ✅ S'assurer que le `metadata` est bien structuré
+            metadata: metadata
         });
 
-        console.log(`✅ Session Stripe créée: ${session.id}`);
-        console.log("📦 Metadata envoyée à Stripe:", session.metadata);
-
-        res.json({ url: session.url });
+        res.status(200).json({
+            status: 'success',
+            message: "Session de paiement créée",
+            data: { sessionUrl: session.url },
+            url: session.url // Pour compatibilité
+        });
 
     } catch (error) {
         console.error("❌ Erreur création paiement :", error);
-        res.status(500).json({ error: "Erreur lors de la création du paiement." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur lors de la création du paiement.",
+            data: null
+        });
     }
 };
 
-
-// ✅ Webhook Stripe pour gérer la finalisation du paiement
 export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
     try {
-        console.log("⚡ Webhook Stripe reçu !");
         const sig = req.headers["stripe-signature"];
 
         if (!sig) {
-            console.error("❌ Signature Stripe manquante.");
-            res.status(400).send("Signature Stripe manquante.");
+            res.status(400).json({
+                status: 'error',
+                message: "Signature Stripe manquante.",
+                data: null
+            });
             return;
         }
 
         const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
         if (!webhookSecret) {
-            console.error("❌ Clé secrète du webhook Stripe manquante.");
-            res.status(500).json({ error: "Clé secrète du webhook Stripe manquante." });
+            res.status(500).json({
+                status: 'error',
+                message: "Clé secrète du webhook Stripe manquante.",
+                data: null
+            });
             return;
         }
 
         let event;
         try {
-            console.log("🔍 Vérification de la signature avec la clé webhook...");
             event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-            console.log("✅ Signature Stripe validée !");
         } catch (err) {
-            console.error("❌ Erreur de vérification de la signature :", err);
-            res.status(400).send("Échec de la vérification de la signature.");
+            res.status(400).json({
+                status: 'error',
+                message: "Échec de la vérification de la signature.",
+                data: null
+            });
             return;
         }
 
-        console.log("🔔 Type d'événement reçu:", event.type);
-
         if (event.type === "checkout.session.completed") {
             const session = event.data.object;
-            console.log("📦 Metadata Stripe complète :", session.metadata);
-            console.log("🔍 Avant parsing : bookIds =", session.metadata?.bookIds);
-
 
             if (!session.metadata?.userId || !session.metadata?.bookIds) {
-                console.error("❌ userId ou bookIds manquants !");
-                res.status(400).json({ error: "userId ou bookIds manquants." });
+                res.status(400).json({
+                    status: 'error',
+                    message: "userId ou bookIds manquants.",
+                    data: null
+                });
                 return;
             }
-
-            console.log("🔍 userId reçu :", session.metadata?.userId);
-            console.log("🔍 bookIds reçus :", session.metadata?.bookIds);
 
             const userId = session.metadata.userId;
             let bookIds;
 
             try {
                 bookIds = JSON.parse(session.metadata.bookIds) as number[];
-                console.log("✅ Après parsing : bookIds =", bookIds);
             } catch (error) {
-                console.error("❌ Erreur parsing des `bookIds`:", error);
-                res.status(400).json({ error: "Erreur parsing bookIds." });
+                res.status(400).json({
+                    status: 'error',
+                    message: "Erreur parsing bookIds.",
+                    data: null
+                });
                 return;
             }
 
-            console.log(`📌 userId reçu: ${userId}`);
-            console.log(`📌 bookIds reçus (après parsing):`, bookIds);
-
             if (!Array.isArray(bookIds) || bookIds.length === 0) {
-                console.error("❌ Aucun livre trouvé dans la transaction !");
-                res.status(400).json({ error: "Aucun livre trouvé dans la transaction." });
+                res.status(400).json({
+                    status: 'error',
+                    message: "Aucun livre trouvé dans la transaction.",
+                    data: null
+                });
                 return;
             }
 
             const existingPayment = await db.select().from(payments).where(eq(payments.paymentId, event.id));
             if (existingPayment.length > 0) {
-                console.log("🚨 Paiement déjà enregistré.");
-                res.status(200).json({ message: "Paiement déjà enregistré." });
+                res.status(200).json({
+                    status: 'success',
+                    message: "Paiement déjà enregistré.",
+                    data: existingPayment[0]
+                });
                 return;
             }
 
-            // 📚 Vérifier que l'utilisateur ne possède pas déjà ces livres
             const alreadyOwned = await db
                 .select()
                 .from(userBooks)
@@ -157,13 +161,15 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
             const booksToAdd = bookIds.filter(bookId => !alreadyOwned.some(owned => owned.bookId === bookId));
 
             if (booksToAdd.length === 0) {
-                console.log("🚨 L'utilisateur possède déjà ces livres, on annule.");
-                res.status(200).json({ message: "Livres déjà ajoutés." });
+                res.status(200).json({
+                    status: 'success',
+                    message: "Livres déjà ajoutés.",
+                    data: null
+                });
                 return;
             }
 
-            // 📚 Ajouter les livres à la bibliothèque de l'utilisateur
-            const insertResult = await db.insert(userBooks).values(
+            const insertedBooks = await db.insert(userBooks).values(
                 booksToAdd.map((bookId) => ({
                     userId: parseInt(userId),
                     bookId,
@@ -171,38 +177,52 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
                 }))
             ).returning();
 
-            console.log("✅ Livres ajoutés à la bibliothèque :", insertResult);
-
-            // 🗑 Vider le panier après l'achat
             await db.delete(cart).where(and(eq(cart.userId, parseInt(userId)), inArray(cart.bookId, bookIds)));
 
-            // 📝 Enregistrer le paiement
-            await db.insert(payments).values({
+            const payment = await db.insert(payments).values({
                 paymentId: event.id,
                 userId: parseInt(userId),
                 amount: String(session.amount_total ?? "0"),
-            });
+            }).returning();
 
-            console.log(`📚 ${booksToAdd.length} livres ajoutés à la bibliothèque de l'utilisateur ${userId}`);
-            res.json({ message: "Paiement validé, livres ajoutés !" });
+            res.status(200).json({
+                status: 'success',
+                message: "Paiement validé, livres ajoutés !",
+                data: {
+                    addedBooks: insertedBooks,
+                    payment: payment[0]
+                }
+            });
         } else {
-            res.json({ received: true });
+            res.status(200).json({
+                status: 'success',
+                message: "Événement non traité",
+                data: { received: true }
+            });
         }
 
     } catch (error) {
         console.error("❌ Erreur Webhook:", error);
-        res.status(500).json({ error: "Erreur interne du serveur." });
+        res.status(500).json({
+            status: 'error',
+            message: "Erreur interne du serveur.",
+            data: null
+        });
     }
 };
 
-// ✅ Confirmation après paiement réussi
 export const paymentSuccess = (req: Request, res: Response): void => {
-    console.log("✅ Paiement confirmé par Stripe !");
-    res.json({ message: "Paiement réussi ! Les livres ont été ajoutés à votre bibliothèque." });
+    res.status(200).json({
+        status: 'success',
+        message: "Paiement réussi ! Les livres ont été ajoutés à votre bibliothèque.",
+        data: null
+    });
 };
 
-// ❌ Message en cas d'annulation du paiement
 export const paymentCancel = (req: Request, res: Response): void => {
-    console.log("❌ Paiement annulé.");
-    res.json({ message: "Paiement annulé." });
+    res.status(200).json({
+        status: 'success',
+        message: "Paiement annulé.",
+        data: null
+    });
 };

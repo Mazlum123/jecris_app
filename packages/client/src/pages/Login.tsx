@@ -1,83 +1,38 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { useAuth } from "../context/useAuth";
+import { useAuthStore } from "../stores/authStore";
+import { api } from "../api";
+import type { ApiError, AuthResponse } from "../types/api";
 import "../styles/pages/_login.scss";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const login = useAuthStore(state => state.login);
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Gère la connexion classique
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await api.post<AuthResponse>("/auth/login", { email, password });
+      const { status, data } = response.data;
 
-      const data = await response.json();
-      console.log("Réponse de l'API :", data);
-
-      if (response.ok) {
-        login(data.token);
-        setSuccess("Connexion réussie !");
-        setError(null);
-        navigate("/redirect", { state: { type: "login", username: data.username, redirectTo: "/" } });
-      } else {
-        setError(data.error || "Échec de la connexion !");
-        setSuccess(null);
+      if (status === 'success' && data.token) {
+        login(data.token, data.user);
+        navigate("/", { replace: true });
       }
     } catch (err) {
-      console.error("Erreur lors de la connexion :", err);
-      setError("Erreur serveur. Veuillez réessayer.");
+      const error = err as ApiError;
+      setError(error.response?.data?.message || error.message || "Erreur lors de la connexion");
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  // ✅ Gère la connexion via Google OAuth
-  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
-    if (!credentialResponse.credential) {
-      setError("Erreur lors de l'authentification Google.");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/google-auth`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: credentialResponse.credential }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        login(data.token);
-
-        if (data.isNewUser) {
-          navigate("/set-password");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        setError(data.error || "Erreur lors de l'authentification Google.");
-      }
-    } catch (err) {
-      console.error("Erreur lors de l'authentification Google :", err);
-      setError("Erreur serveur. Veuillez réessayer.");
-    }
-  };
-
-  const handleGoogleError = () => {
-    setError("Échec de la connexion Google.");
   };
 
   return (
@@ -85,7 +40,6 @@ const Login = () => {
       <h1>Connexion</h1>
 
       {error && <p className="error">{error}</p>}
-      {success && <p className="success">{success}</p>}
 
       <form onSubmit={handleLogin} className="auth-form">
         <input
@@ -94,6 +48,7 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={isLoading}
         />
 
         <input
@@ -102,16 +57,15 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          disabled={isLoading}
         />
 
-        <button type="submit">Se connecter</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? "Connexion en cours..." : "Se connecter"}
+        </button>
       </form>
 
-      <p>Ou connectez-vous avec Google :</p>
-
-      <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
-
-      <p>
+      <p className="auth-links">
         Pas encore de compte ? <Link to="/register">S'inscrire</Link>
       </p>
     </div>
