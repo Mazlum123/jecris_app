@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import type { ApiResponse, AsyncActionError } from '../types/api';
+import type { ApiResponse, AsyncActionError } from '../types/api'
+import { api } from "../api";;
 import "../styles/pages/_bibliotheque.scss";
 
 interface UserBook {
