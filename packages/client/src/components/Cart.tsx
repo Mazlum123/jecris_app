@@ -1,24 +1,32 @@
-import { useState } from "react";
+// src/components/Cart.tsx
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../stores/cartStore";
 import { useAuthStore } from "../stores/authStore";
 import { api } from "../lib/api";
-import type { ApiResponse, AsyncActionError } from '../types/api';
+import type { ApiResponse, StripeResponse } from '../types/api';
 import "../styles/components/_cart.scss";
-
-interface StripeResponse {
-  sessionUrl: string;
-}
 
 const Cart = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const { items: cartItems, removeFromCart, clearCart, totalPrice } = useCartStore();
+  const { 
+    items: cartItems, 
+    removeFromCart, 
+    clearCart, 
+    totalPrice,
+    initializeCart,
+    isLoading,
+    error: cartError,
+    setError 
+  } = useCartStore();
 
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (isAuthenticated) {
+      initializeCart();
+    }
+  }, [isAuthenticated, initializeCart]);
 
-  // Gérer le paiement
   const handleCheckout = async () => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -30,12 +38,12 @@ const Cart = () => {
       return;
     }
 
-    setIsProcessing(true);
-    setError(null);
-
     try {
       const response = await api.post<ApiResponse<StripeResponse>>("/payment/session", {
-        items: cartItems
+        items: cartItems.map(item => ({
+          bookId: parseInt(item.id),
+          quantity: 1
+        }))
       });
 
       if (response.data.data?.sessionUrl) {
@@ -44,47 +52,70 @@ const Cart = () => {
         setError("Erreur lors de la création de la session de paiement.");
       }
     } catch (err) {
-      const error = err as AsyncActionError;
-      setError(error.message || "Erreur lors de la création du paiement.");
-    } finally {
-      setIsProcessing(false);
+      console.error("Erreur paiement:", err);
+      setError("Erreur lors de la création du paiement.");
     }
   };
 
-  const handleRemoveFromCart = (bookId: string) => {
+  const handleRemoveFromCart = async (bookId: string) => {
     try {
-      removeFromCart(bookId);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Erreur lors de la suppression du livre du panier.";
-      setError(errorMessage);
-      console.error("Erreur lors de la suppression :", err);
+      await removeFromCart(bookId);
+    } catch (err) {
+      console.error("Erreur suppression:", err);
     }
   };
 
-  const handleClearCart = () => {
+  const handleClearCart = async () => {
     try {
-      clearCart();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Erreur lors de la vidange du panier.";
-      setError(errorMessage);
-      console.error("Erreur lors de la vidange :", err);
+      await clearCart();
+    } catch (err) {
+      console.error("Erreur vidage:", err);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="cart-container">
+        <h2>🛒 Mon Panier</h2>
+        <div className="auth-required">
+          <p>Veuillez vous connecter pour accéder à votre panier.</p>
+          <button 
+            onClick={() => navigate('/login')} 
+            className="btn-primary"
+          >
+            Se connecter
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="cart-container">
       <h2>🛒 Mon Panier</h2>
 
-      {error && (
+      {cartError && (
         <div className="error-message" role="alert">
-          {error}
+          {cartError}
+          <button 
+            onClick={() => setError(null)}
+            className="close-error"
+            aria-label="Fermer le message d'erreur"
+          >
+            ×
+          </button>
         </div>
       )}
 
-      {cartItems.length === 0 ? (
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Chargement du panier...</p>
+        </div>
+      ) : cartItems.length === 0 ? (
         <div className="empty-cart">
           <p>Votre panier est vide.</p>
-          <button
+          <button 
             onClick={() => navigate('/bibliotheque')}
             className="btn-primary"
           >
@@ -106,10 +137,10 @@ const Cart = () => {
               <button
                 onClick={() => handleRemoveFromCart(book.id)}
                 className="btn-remove"
-                disabled={isProcessing}
+                disabled={isLoading}
                 aria-label={`Retirer ${book.title} du panier`}
               >
-                Retirer
+                {isLoading ? "Suppression..." : "Retirer"}
               </button>
             </div>
           ))}
@@ -121,7 +152,7 @@ const Cart = () => {
               <button
                 onClick={handleClearCart}
                 className="btn-secondary"
-                disabled={isProcessing}
+                disabled={isLoading}
               >
                 Vider le panier
               </button>
@@ -129,9 +160,9 @@ const Cart = () => {
               <button
                 onClick={handleCheckout}
                 className="btn-primary"
-                disabled={isProcessing || cartItems.length === 0}
+                disabled={isLoading || cartItems.length === 0}
               >
-                {isProcessing ? (
+                {isLoading ? (
                   <span>
                     <span className="loading-spinner"></span>
                     Traitement en cours...

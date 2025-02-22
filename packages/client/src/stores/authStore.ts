@@ -23,6 +23,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       login: (token, user) => {
+        localStorage.setItem("authToken", token);
         set({ token, user, isAuthenticated: true });
       },
 
@@ -38,7 +39,8 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage",
       onRehydrateStorage: () => (state) => {
-        if (state) {
+        if (state?.token) {
+          state.isAuthenticated = true;
           console.log("Store rehydrated:", state);
         }
       },

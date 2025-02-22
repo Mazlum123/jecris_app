@@ -8,6 +8,7 @@ import bookRoutes from "./routes/bookRoutes.js";
 import readRoutes from "./routes/readRoutes.js";
 import userBooksRoutes from "./routes/userBooksRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import { handleWebhook } from './controllers/paymentController.js';
 import cartRoutes from "./routes/cartRoutes.js";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import "./config/passport.js";
@@ -23,10 +24,14 @@ console.log(`🔗 Client URL : ${CLIENT_URL}`);
 
 const app = express();
 
-app.use(express.json());
-app.use(passport.initialize()); // Initialisation de Passport
+// ✅ Stripe webhook - Doit rester avant express.json()
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 
-// ✅ Gestion dynamique des origines selon l'environnement
+// ✅ Middleware global
+app.use(express.json());
+app.use(passport.initialize()); 
+
+// ✅ Gestion CORS
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [CLIENT_URL, `http://localhost:5173`];
@@ -43,11 +48,7 @@ app.use(cors({
   credentials: true
 }));
 
-// ✅ Gestion des pré-requêtes OPTIONS pour CORS
 app.options('*', cors());
-
-// ✅ Stripe webhook - Doit rester avant express.json()
-app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 
 // ✅ Routes API
 app.use("/api/auth", authRoutes);

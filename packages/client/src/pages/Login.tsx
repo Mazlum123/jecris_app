@@ -8,7 +8,7 @@ import "../styles/pages/_login.scss";
 const Login = () => {
   const navigate = useNavigate();
   const login = useAuthStore(state => state.login);
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

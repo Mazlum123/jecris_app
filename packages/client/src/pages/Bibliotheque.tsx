@@ -12,7 +12,7 @@ interface Book {
   description: string;
   price: number;
   isFree: boolean;
-  author?: string;
+  author: string | null;
 }
 
 interface AddToLibraryResponse {
@@ -21,9 +21,8 @@ interface AddToLibraryResponse {
 
 const Bibliotheque = () => {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const addToCart = useCartStore(state => state.addToCart);
+  const { addToCart, isLoading: isCartLoading, error: cartError, setError } = useCartStore();
 
-  // Récupération des livres
   const {
     data: books,
     error: booksError,
@@ -37,7 +36,6 @@ const Bibliotheque = () => {
     }
   });
 
-  // Mutation pour ajouter un livre gratuit à la bibliothèque
   const addToPersonalLibrary = useMutation({
     mutationFn: async (bookId: string) => {
       const response = await api.post<ApiResponse<AddToLibraryResponse>>(
@@ -53,16 +51,21 @@ const Bibliotheque = () => {
     },
   });
 
-  // Gestion de l'ajout au panier
-  const handleAddToCart = (book: Book) => {
-    addToCart({
-      id: book.id.toString(),
-      title: book.title,
-      description: book.description,
-      price: book.price,
-      author: book.author || "Auteur inconnu"
-    });
-    alert("Livre ajouté au panier !");
+  const handleAddToCart = async (book: Book) => {
+    try {
+      await addToCart({
+        id: book.id.toString(),
+        title: book.title,
+        description: book.description,
+        price: book.price,
+        author: book.author || "Auteur inconnu"
+      });
+      setError(null);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      }
+    }
   };
 
   if (isLoadingBooks) {
@@ -95,14 +98,28 @@ const Bibliotheque = () => {
   return (
     <div className="bibliotheque-container">
       <h1>📚 Bibliothèque Publique</h1>
+      
+      {cartError && (
+        <div className="error-message" role="alert">
+          {cartError}
+          <button 
+            onClick={() => setError(null)} 
+            className="close-error"
+            aria-label="Fermer le message d'erreur"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <div className="bento-grid">
         {books.map((book) => (
           <div key={book.id} className="bento-card">
             <h3>{book.title}</h3>
-            <p>{book.description}</p>
+            <p className="book-description">{book.description}</p>
             <p>
               <strong>Auteur : </strong>
-              {book.author ?? "Auteur inconnu"}
+              {book.author ? book.author : "Auteur inconnu"}
             </p>
             <p>
               <strong>Prix : </strong>
@@ -123,9 +140,10 @@ const Bibliotheque = () => {
               ) : (
                 <button
                   onClick={() => handleAddToCart(book)}
+                  disabled={isCartLoading}
                   className="btn-secondary"
                 >
-                  Ajouter au panier 🛒
+                  {isCartLoading ? "Ajout en cours..." : "Ajouter au panier 🛒"}
                 </button>
               )
             ) : (

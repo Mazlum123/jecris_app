@@ -6,18 +6,18 @@ import { eq } from "drizzle-orm";
 
 export const getAllBooks = async (req: Request, res: Response) => {
     try {
-        const allBooks = await db.select().from(books);
+        const allBooks = await db.select().from(books).leftJoin(authors, eq(books.authorId, authors.id));
 
-        const booksWithFreeFlag = allBooks.map((book) => ({
-            ...book,
-            isFree: parseFloat(book.price ?? "0") === 0,
+        const booksWithAuthors = allBooks.map((record) => ({
+            ...record.books,
+            author: record.authors ? record.authors.name : "Auteur inconnu",
+            isFree: parseFloat(record.books.price ?? "0") === 0,
         }));
 
         res.status(200).json({
             status: 'success',
             message: "Livres récupérés avec succès",
-            data: booksWithFreeFlag, // Le front attend directement le tableau
-            books: booksWithFreeFlag // Pour compatibilité si nécessaire
+            data: booksWithAuthors
         });
     } catch (error) {
         console.error("🚨 ERREUR SQL :", error);
@@ -42,7 +42,7 @@ export const getBookById = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        const book = await db.select().from(books).where(eq(books.id, bookId)).limit(1);
+        const book = await db.select().from(books).leftJoin(authors, eq(books.authorId, authors.id)).where(eq(books.id, bookId)).limit(1);
 
         if (!book.length) {
             res.status(404).json({
@@ -53,11 +53,15 @@ export const getBookById = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
+        const bookWithAuthor = {
+            ...book[0].books,
+            author: book[0].authors ? book[0].authors.name : "Auteur inconnu",
+        };
+
         res.status(200).json({
             status: 'success',
             message: "Livre trouvé",
-            data: book[0],
-            book: book[0] // Pour compatibilité si nécessaire
+            data: bookWithAuthor
         });
     } catch (error) {
         console.error("❌ Erreur récupération livre :", error);
