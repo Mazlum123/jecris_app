@@ -8,29 +8,31 @@ export class AppError extends Error {
 }
 
 export const errorHandler = (
-  err: Error | ZodError,
+  err: unknown, // Utilisez 'unknown' pour une meilleure sécurité
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): void => { // <-- Retourne 'void' au lieu de 'Response'
   if (err instanceof ZodError) {
-    return res.status(400).json({
+    res.status(400).json({
       status: 'error',
       message: 'Données invalides',
-      errors: err.format() // Utilisation de format() au lieu de .errors
+      errors: err.format(),
     });
+    return; // Utilisez 'return' pour arrêter l'exécution
   }
 
   if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       status: 'error',
-      message: err.message
+      message: err.message,
     });
+    return;
   }
 
   console.error('Erreur non gérée:', err);
   res.status(500).json({
     status: 'error',
-    message: 'Erreur interne du serveur'
+    message: 'Erreur interne du serveur',
   });
 };
