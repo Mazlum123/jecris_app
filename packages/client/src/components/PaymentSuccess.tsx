@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCartStore } from '../stores/cartStore';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const { clearCart } = useCart();
+  const { clearCart } = useCartStore();
 
   useEffect(() => {
     // Vider le panier après un paiement réussi
