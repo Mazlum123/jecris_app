@@ -8,18 +8,18 @@ export class AppError extends Error {
 }
 
 export const errorHandler = (
-  err: unknown, // Utilisez 'unknown' pour une meilleure sécurité
+  err: unknown,
   req: Request,
   res: Response,
   next: NextFunction
-): void => { // <-- Retourne 'void' au lieu de 'Response'
+): void => {
   if (err instanceof ZodError) {
     res.status(400).json({
       status: 'error',
       message: 'Données invalides',
       errors: err.format(),
     });
-    return; // Utilisez 'return' pour arrêter l'exécution
+    return;
   }
 
   if (err instanceof AppError) {
