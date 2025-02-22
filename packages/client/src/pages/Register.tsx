@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { api } from "../api";
+import { api } from "../lib/api";
 import type { ApiError, AuthResponse } from "../types/api";
 import "../styles/pages/_register.scss";
 
 const Register = () => {
   const navigate = useNavigate();
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,7 +15,7 @@ const Register = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       setError("Les mots de passe ne correspondent pas");
       return;
@@ -29,7 +29,7 @@ const Register = () => {
         email, 
         password 
       });
-      
+
       if (response.data.status === 'success') {
         navigate("/login", { 
           state: { message: "Compte créé avec succès ! Vous pouvez maintenant vous connecter." }

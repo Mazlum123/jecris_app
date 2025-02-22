@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../api";
+import { api } from "../lib/api";
+import { useAuthStore } from "../stores/authStore";
 import "../styles/pages/_home.scss";
 
 interface UserBook {
@@ -13,7 +13,7 @@ interface UserBook {
 }
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // Récupérer les derniers livres de l'utilisateur s'il est connecté
   const { data: recentBooks, isLoading } = useQuery<UserBook[]>({

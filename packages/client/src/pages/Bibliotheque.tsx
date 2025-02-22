@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { api } from "../api";
+import { api } from "../lib/api";
 import { useAuthStore } from "../stores/authStore";
 import { useCartStore } from "../stores/cartStore";
 import type { ApiResponse, AsyncActionError } from '../types/api';

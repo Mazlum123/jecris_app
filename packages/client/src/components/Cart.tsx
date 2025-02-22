@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../stores/cartStore";
 import { useAuthStore } from "../stores/authStore";
-import { api } from "../api";
+import { api } from "../lib/api";
 import type { ApiResponse, AsyncActionError } from '../types/api';
 import "../styles/components/_cart.scss";
 

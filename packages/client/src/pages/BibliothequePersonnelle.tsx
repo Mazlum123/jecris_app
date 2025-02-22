@@ -1,34 +1,37 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { useAuthStore } from "../stores/authStore";
-import type { ApiResponse, AsyncActionError } from '../types/api'
-import { api } from "../api";;
-import "../styles/pages/_bibliotheque.scss";
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
+import { api } from '../lib/api';
+import '../styles/pages/_bibliotheque.scss';
 
-interface UserBook {
+interface Book {
   id: number;
   title: string;
   description: string;
+  content: string;
+  author: string;
   lastPageRead?: number;
   addedAt: string;
-  author?: string;
+}
+
+interface ApiResponse<T> {
+  status: string;
+  message: string;
+  data: T;
 }
 
 const BibliothequePersonnelle = () => {
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state: { isAuthenticated: boolean }) => state.isAuthenticated);
 
-  const {
-    data: books,
-    error,
-    isLoading,
-    refetch
-  } = useQuery<UserBook[], Error>({
-    queryKey: ["user-books"],
+  const { data: userBooks, isLoading, error } = useQuery({
+    queryKey: ['user-books'],
     queryFn: async () => {
-      const response = await api.get<ApiResponse<UserBook[]>>("/user-books");
-      return response.data.data || [];
+      const response = await api.get<ApiResponse<Book[]>>('/user-books');
+      return response.data.data;
     },
     enabled: isAuthenticated,
+    retry: 1
   });
 
   if (!isAuthenticated) {
@@ -36,9 +39,9 @@ const BibliothequePersonnelle = () => {
       <div className="auth-required">
         <h2>Accès non autorisé</h2>
         <p>Veuillez vous connecter pour accéder à votre bibliothèque personnelle.</p>
-        <Link to="/login" className="btn-primary">
+        <button onClick={() => navigate('/login')}>
           Se connecter
-        </Link>
+        </button>
       </div>
     );
   }
@@ -46,81 +49,68 @@ const BibliothequePersonnelle = () => {
   if (isLoading) {
     return (
       <div className="loading-container">
+        <div className="loading-spinner"></div>
         <p>Chargement de votre bibliothèque...</p>
       </div>
     );
   }
 
   if (error) {
-    const apiError = error as AsyncActionError;
     return (
       <div className="error-container">
-        <p>
-          {apiError.message || "Erreur lors de la récupération de votre bibliothèque."}
-        </p>
-        <button onClick={() => refetch()} className="btn-retry">
+        <p>Une erreur est survenue lors du chargement de vos livres</p>
+        <button onClick={() => window.location.reload()}>
           Réessayer
         </button>
       </div>
     );
   }
 
-  if (!books?.length) {
+  if (!userBooks || userBooks.length === 0) {
     return (
       <div className="empty-container">
-        <h1>📚 Ma Bibliothèque Personnelle</h1>
-        <p>Votre bibliothèque est vide.</p>
-        <div className="action-buttons">
-          <Link to="/bibliotheque" className="btn-primary">
-            Découvrir des livres
-          </Link>
-        </div>
+        <h2>Votre bibliothèque est vide</h2>
+        <p>Découvrez notre catalogue et commencez à lire !</p>
+        <button onClick={() => navigate('/bibliotheque')}>
+          Explorer la bibliothèque
+        </button>
       </div>
     );
   }
 
   return (
     <div className="bibliotheque-container">
-      <h1>📚 Ma Bibliothèque Personnelle</h1>
-      <div className="bento-grid">
-        {books.map((book) => (
-          <div key={book.id} className="bento-card">
-            <div className="book-header">
+      <h1>Ma Bibliothèque</h1>
+      
+      <div className="books-grid">
+      {userBooks.map((book: Book) => (
+          <div key={book.id} className="book-card">
+            <div className="book-content">
               <h3>{book.title}</h3>
-              {book.author && (
-                <p className="author">par {book.author}</p>
-              )}
-            </div>
-
-            <p className="description">{book.description}</p>
-
-            <div className="book-info">
-              {book.lastPageRead && (
-                <p className="reading-progress">
-                  Dernière page lue : {book.lastPageRead}
-                </p>
-              )}
-              <p className="added-date">
-                Ajouté le : {new Date(book.addedAt).toLocaleDateString('fr-FR')}
-              </p>
-            </div>
-
-            <div className="card-actions">
-              <Link
-                to={`/read/${book.id}/1`}
-                className="btn-primary"
-              >
-                Lire 📖
-              </Link>
+              <p className="book-author">par {book.author}</p>
+              <p className="book-description">{book.description}</p>
               
-              {book.lastPageRead && book.lastPageRead > 1 && (
-                <Link
-                  to={`/read/${book.id}/${book.lastPageRead}`}
-                  className="btn-secondary"
-                >
-                  Reprendre la lecture
-                </Link>
-              )}
+              <div className="book-actions">
+                {book.lastPageRead && book.lastPageRead > 1 ? (
+                  <button
+                    onClick={() => navigate(`/read/${book.id}/${book.lastPageRead}`)}
+                    className="btn-secondary"
+                  >
+                    Reprendre la lecture (Page {book.lastPageRead})
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate(`/read/${book.id}/1`)}
+                    className="btn-primary"
+                  >
+                    Commencer la lecture
+                  </button>
+                )}
+              </div>
+
+              <p className="book-date">
+                Ajouté le {new Date(book.addedAt).toLocaleDateString('fr-FR')}
+              </p>
             </div>
           </div>
         ))}

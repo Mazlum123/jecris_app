@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import { api } from "../api";
+import { api } from "../lib/api";
 import type { ApiError, AuthResponse } from "../types/api";
 import "../styles/pages/_login.scss";
 

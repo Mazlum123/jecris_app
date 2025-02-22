@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "./layouts/MainLayout";
+import MainLayout from "./components/layouts/MainLayout";
 import Home from "./pages/Home";
 import Bibliotheque from "./pages/Bibliotheque";
 import BibliothequePersonnelle from "./pages/BibliothequePersonnelle";
@@ -8,6 +8,7 @@ import BookDetails from "./pages/BookDetails";
 import RedirectPage from "./pages/RedirectPage";
 import Register from "./pages/Register";
 import Cart from "./components/Cart";
+import BookReader from "./components/features/books/BookReader";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: "/books/:id", element: <BookDetails /> },
       { path: "/redirect", element: <RedirectPage /> },
       { path: "/cart", element: <Cart /> },
+      { path: "/read/:bookId/:pageNumber", element: <BookReader /> },
     ],
   },
 ]);

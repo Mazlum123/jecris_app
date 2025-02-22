@@ -1,4 +1,3 @@
-// src/stores/cartStore.ts
 import { create } from 'zustand'
 
 interface Book {

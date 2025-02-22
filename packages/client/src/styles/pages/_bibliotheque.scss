@@ -1,85 +1,156 @@
-@use "../base/mixins" as *;
+// styles/pages/_bibliotheque.scss
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
 
 .bibliotheque-container {
-  padding: var(--spacing-xl) var(--spacing-lg);
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 
   h1 {
-    text-align: center;
-    margin-bottom: var(--spacing-xl);
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: var(--title-color);
+  }
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.book-card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  .book-content {
+    padding: 1.5rem;
+
+    h3 {
+      font-size: 1.25rem;
+      color: var(--title-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .book-author {
+      color: var(--text-color);
+      opacity: 0.8;
+      margin-bottom: 1rem;
+    }
+
+    .book-description {
+      color: var(--text-color);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      max-height: 4.5em;
+    }
+
+    .book-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: var(--border-radius-md);
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        
+        &.btn-primary {
+          background: var(--primary-color);
+          color: white;
+          
+          &:hover {
+            opacity: 0.9;
+          }
+        }
+        
+        &.btn-secondary {
+          background: var(--secondary-color);
+          color: white;
+          
+          &:hover {
+            opacity: 0.9;
+          }
+        }
+      }
+    }
+
+    .book-date {
+      font-size: 0.875rem;
+      color: var(--text-color);
+      opacity: 0.6;
+    }
+  }
+}
+
+// États
+.auth-required,
+.loading-container,
+.error-container,
+.empty-container {
+  text-align: center;
+  padding: 3rem;
+  max-width: 600px;
+  margin: 3rem auto;
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
     color: var(--title-color);
   }
 
-  .loading-container,
-  .error-container,
-  .empty-container {
-    text-align: center;
-    padding: var(--spacing-xl);
-    background: var(--card-bg);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--card-shadow);
-    margin: var(--spacing-xl) auto;
-    max-width: 600px;
-
-    .btn-retry {
-      @include button(var(--primary-color));
-      margin-top: var(--spacing-lg);
-    }
+  p {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
   }
 
-  .bento-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
+  button {
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 
-    .bento-card {
-      background: var(--card-bg);
-      padding: var(--spacing-lg);
-      border-radius: var(--border-radius-lg);
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      
-      h3 {
-        color: var(--title-color);
-        margin-bottom: var(--spacing-sm);
-      }
-
-      .author {
-        color: var(--text-color);
-        opacity: 0.8;
-        font-size: 0.9rem;
-        margin-bottom: var(--spacing-md);
-      }
-
-      .description {
-        flex-grow: 1;
-        margin-bottom: var(--spacing-md);
-      }
-
-      .price {
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: var(--spacing-md);
-      }
-
-      .card-actions {
-        display: flex;
-        gap: var(--spacing-sm);
-
-        .btn-free {
-          @include button(var(--success-color));
-        }
-
-        .btn-add {
-          @include button(var(--primary-color));
-        }
-
-        .btn-login {
-          @include button(transparent, var(--primary-color));
-          border: 2px solid currentColor;
-        }
-      }
+    &:hover {
+      opacity: 0.9;
     }
   }
+}
+
+.loading-spinner {
+  border: 4px solid var(--bg-color);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
-import { useCart } from "../context/useCart";
+import { useAuthStore } from "../stores/authStore";
+import { useCartStore } from "../stores/cartStore";
+import "../styles/components/_navbar.scss";
 
 const Navbar = () => {
-  const { isAuthenticated, logout } = useAuth();
-  const { cartItems } = useCart();
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const logout = useAuthStore(state => state.logout);
+  const user = useAuthStore(state => state.user);
+  const { items } = useCartStore();
 
   const handleLogout = async () => {
     try {
@@ -29,14 +32,17 @@ const Navbar = () => {
         <li>
           <Link to="/bibliotheque">Bibliothèque</Link>
         </li>
-        
+
         {isAuthenticated ? (
           <>
             <li>
               <Link to="/bibliotheque-personnelle">📚 Ma Bibliothèque</Link>
             </li>
             <li>
-              <button 
+              <Link to="/profil">👤 {user?.username || user?.email || "Profil"}</Link>
+            </li>
+            <li>
+              <button
                 onClick={handleLogout}
                 className="logout-button"
               >
@@ -58,8 +64,8 @@ const Navbar = () => {
         <li>
           <Link to="/cart" className="cart-link">
             Panier 🛒
-            {cartItems.length > 0 && (
-              <span className="cart-badge">{cartItems.length}</span>
+            {items.length > 0 && (
+              <span className="cart-badge">{items.length}</span>
             )}
           </Link>
         </li>
