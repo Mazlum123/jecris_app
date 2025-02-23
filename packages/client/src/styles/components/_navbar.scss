@@ -1,82 +1,89 @@
-@use "../base/mixins" as *;
+@use "../base/mixins";
 
 .navbar {
-  background-color: var(--navbar-bg);
-  padding: var(--spacing-md) var(--spacing-lg);
-  box-shadow: var(--card-shadow);
+  width: 100%;
+  background-color: rgba(220, 217, 207, 0.95);
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(8px);
 
   .container {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
 
-    @include mobile {
+    @include mixins.mobile {
       flex-direction: column;
-      gap: var(--spacing-md);
+      gap: 1rem;
     }
   }
 
-  &-brand {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     text-decoration: none;
+    color: #333;
 
-    &:hover {
-      color: var(--accent-color);
+    img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: #333;
     }
   }
 
   &-links {
     display: flex;
-    gap: var(--spacing-md);
+    gap: 2rem;
     align-items: center;
     list-style: none;
+    margin: 0;
+    padding: 0;
 
-    @include mobile {
+    @include mixins.mobile {
       flex-wrap: wrap;
       justify-content: center;
+      gap: 1rem;
     }
 
     a {
-      color: var(--text-color);
+      color: #333;
       text-decoration: none;
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--border-radius-sm);
-      transition: all var(--transition-speed) ease;
+      font-weight: 500;
+      transition: color 0.2s ease;
+      font-size: 1rem;
 
       &:hover {
-        color: var(--primary-color);
-        background-color: rgba(255, 255, 255, 0.1);
+        color: #000;
       }
 
       &.active {
-        color: var(--accent-color);
-        background-color: rgba(255, 255, 255, 0.2);
+        color: #000;
+        font-weight: 600;
       }
     }
-  }
 
-  .cart-badge {
-    position: relative;
-    
-    &::after {
-      content: attr(data-count);
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background-color: var(--accent-color);
+    .register-button {
+      background-color: #333;
       color: white;
-      font-size: 0.75rem;
-      min-width: 20px;
-      height: 20px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #000;
+      }
     }
   }
 }

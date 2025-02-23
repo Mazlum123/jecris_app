@@ -19,60 +19,62 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <Link to="/" className="logo">
+      <div className="container">
+        <Link to="/" className="brand">
+          <img src="../../public/assets/logoT.png" alt="Jecris Logo" />
           <h1>Jecris</h1>
         </Link>
+
+        <ul className="navbar-links">
+          <li>
+            <Link to="/">Accueil</Link>
+          </li>
+          <li>
+            <Link to="/bibliotheque">Bibliothèques</Link>
+          </li>
+          {isAuthenticated && (
+            <li>
+              <Link to="/bibliotheque-personnelle">Ma Bibliothèque</Link>
+            </li>
+          )}
+          <li>
+            <Link to="/contact">Contact</Link>
+          </li>
+
+          {isAuthenticated ? (
+            <>
+              <li>
+                <Link to="/profil">{user?.username || user?.email || "Profil"}</Link>
+              </li>
+              <li>
+                <button onClick={handleLogout} className="logout-button">
+                  Déconnexion
+                </button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <Link to="/login">Se connecter</Link>
+              </li>
+              <li>
+                <Link to="/register" className="register-button">
+                  S'inscrire
+                </Link>
+              </li>
+            </>
+          )}
+
+          <li>
+            <Link to="/cart" className="cart-link">
+              Panier
+              {items.length > 0 && (
+                <span className="cart-badge">{items.length}</span>
+              )}
+            </Link>
+          </li>
+        </ul>
       </div>
-
-      <ul className="navbar-links">
-        <li>
-          <Link to="/">Accueil</Link>
-        </li>
-        <li>
-          <Link to="/bibliotheque">Bibliothèque</Link>
-        </li>
-        <li>
-          <Link to="/contact">Contact</Link>
-        </li>
-
-        {isAuthenticated ? (
-          <>
-            <li>
-              <Link to="/bibliotheque-personnelle">📚 Ma Bibliothèque</Link>
-            </li>
-            <li>
-              <Link to="/profil">👤 {user?.username || user?.email || "Profil"}</Link>
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="logout-button"
-              >
-                Déconnexion
-              </button>
-            </li>
-          </>
-        ) : (
-          <>
-            <li>
-              <Link to="/login">Se connecter</Link>
-            </li>
-            <li>
-              <Link to="/register">S'inscrire</Link>
-            </li>
-          </>
-        )}
-
-        <li>
-          <Link to="/cart" className="cart-link">
-            Panier 🛒
-            {items.length > 0 && (
-              <span className="cart-badge">{items.length}</span>
-            )}
-          </Link>
-        </li>
-      </ul>
     </nav>
   );
 };

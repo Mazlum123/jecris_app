@@ -1,20 +1,23 @@
 // Base
-@use "./base/variables" as *;
-@use "./base/mixins" as *;
-@use "./base/global" as *;
+@use "base/variables";
+@use "base/mixins";
+@use "base/global";
 
-// Layouts
-@use "./layouts/mainLayout" as *;
-
-// Composants
-@use "./components/buttons" as *;
-@use "./components/navbar" as *;
-@use "./components/cart" as *;
-@use "./components/loading" as *;
+// Components
+@use "components/navbar";
+@use "components/buttons";
+@use "components/cart";
+@use "components/loading";
+@use "components/bento";
+@use "components/features/books/book-reader";
 
 // Pages
-@use "./pages/home" as *;
-@use "./pages/bibliotheque" as *;
-@use "./pages/login" as *;
-@use "./pages/register" as *;
-@use "./pages/redirect" as *;
+@use "pages/bibliotheque";
+@use "pages/home";
+@use "pages/login";
+@use "pages/register";
+@use "pages/redirect";
+@use "pages/profil";
+
+// Layouts
+@use "layouts/mainLayout";

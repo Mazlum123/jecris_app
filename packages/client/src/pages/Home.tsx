@@ -39,9 +39,9 @@ const Home = () => {
               <Link to="/bibliotheque-personnelle" className="btn primary">
                 📚 Accéder à ma bibliothèque
               </Link>
-              <Link to="/books/create" className="btn secondary">
+              {/* <Link to="/books/create" className="btn secondary">
                 ✍ Écrire un livre
-              </Link>
+              </Link> */}
             </div>
           </section>
 
