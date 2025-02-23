@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import bodyParser from 'body-parser';
+// import bodyParser from 'body-parser';
 import passport from "passport";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -26,8 +26,8 @@ console.log(`🔗 Client URL : ${CLIENT_URL}`);
 const app = express();
 
 // ✅ Stripe webhook - Doit rester avant express.json()
-app.post('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }), handleWebhook);
-// app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+// app.post('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }), handleWebhook);
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 
 // ✅ Middleware global
 app.use(express.json());
