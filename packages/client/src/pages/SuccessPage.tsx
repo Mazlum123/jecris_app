@@ -5,7 +5,7 @@ const SuccessPage = () => {
   useEffect(() => {
     const fetchUserBooks = async () => {
       try {
-        const res = await axios.get('/api/user-books');
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/user-books`);
         console.log('📚 Livres achetés :', res.data);
       } catch (err) {
         console.error("❌ Erreur lors du chargement des livres :", err);

@@ -1,18 +1,19 @@
 {
   "name": "jecris_app",
   "version": "1.0.0",
-  "description": "Une application dédiée au écrivain amateurs, mais aussi pour les lecteurs ambitieux.",
-  "main": "index.ts",
+  "description": "Une application dédiée aux écrivains amateurs, mais aussi pour les lecteurs ambitieux.",
+  "private": true,
   "scripts": {
     "dev:client": "pnpm --filter jecris_app-client dev",
     "dev:server": "pnpm --filter jecris_app-server dev",
-    "dev": "concurrently \"pnpm dev:client\" \"pnpm dev:server\""
+    "dev": "concurrently \"pnpm dev:client\" \"pnpm dev:server\"",
+    "build": "pnpm --filter jecris_app-client build && pnpm --filter jecris_app-server build",
+    "clean": "rm -rf node_modules pnpm-lock.yaml && pnpm install"
   },
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
-    "@types/express": "^5.0.0",
     "@types/node": "^22.13.1",
     "concurrently": "^8.2.2"
   },
@@ -32,10 +33,5 @@
   "bugs": {
     "url": "https://github.com/Mazlum123/jecris_app/issues"
   },
-  "homepage": "https://github.com/Mazlum123/jecris_app#readme",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2"
-  }
+  "homepage": "https://github.com/Mazlum123/jecris_app#readme"
 }
