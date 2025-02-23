@@ -14,6 +14,7 @@ import Cart from "./components/Cart";
 import BookReader from "./components/features/books/BookReader";
 import SuccessPage from "./pages/SuccessPage";
 import CancelPage from "./pages/CancelPage";
+import Contact from "./pages/Contact";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
       { path: "/read/:bookId/:pageNumber", element: <BookReader /> },
       { path: "/success", element: <SuccessPage /> },
       { path: "/cancel", element: <CancelPage /> },
+      { path: "/contact", element: <Contact /> },
       // Routes protégées
       {
         element: <ProtectedRoute />,

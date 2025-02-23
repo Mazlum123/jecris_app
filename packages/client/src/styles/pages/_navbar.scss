@@ -1,0 +1,68 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #d9d6c3;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+  
+      .logo-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+  
+        .logo {
+          width: 50px; /* Ajuste la taille du logo */
+          height: auto;
+          margin-right: 0.5rem;
+        }
+  
+        h1 {
+          font-size: 1.5rem;
+          color: #333;
+          margin: 0;
+        }
+      }
+    }
+  
+    .navbar-links {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin: 0;
+  
+      li {
+        a, button {
+          text-decoration: none;
+          color: #333;
+          font-weight: 500;
+          background: none;
+          border: none;
+          cursor: pointer;
+  
+          &:hover {
+            color: #4CAF50;
+          }
+        }
+  
+        .cart-badge {
+          background-color: #f44336;
+          color: white;
+          border-radius: 50%;
+          padding: 0.2rem 0.5rem;
+          font-size: 0.8rem;
+          margin-left: 0.3rem;
+        }
+      }
+    }
+  
+    .logout-button {
+      color: #f44336;
+    }
+  }
+  

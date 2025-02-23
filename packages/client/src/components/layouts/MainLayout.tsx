@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../Navbar";
 import "../../styles/layouts/_mainLayout.scss";
+import CookieBanner from "../CookieBanner";
 
 const MainLayout = () => {
   return (
@@ -9,6 +10,7 @@ const MainLayout = () => {
       <main>
         <Outlet />
       </main>
+      <CookieBanner />
     </div>
   );
 };

@@ -1,20 +1,20 @@
 // Base
-@use "base/variables";
-@use "base/mixins";
-@use "base/global";
+@use "./base/variables" as *;
+@use "./base/mixins" as *;
+@use "./base/global" as *;
 
 // Layouts
-@use "layouts/mainLayout";
+@use "./layouts/mainLayout" as *;
 
 // Composants
-@use "components/buttons";
-@use "components/navbar";
-@use "components/cart";
-@use "components/loading";
+@use "./components/buttons" as *;
+@use "./components/navbar" as *;
+@use "./components/cart" as *;
+@use "./components/loading" as *;
 
 // Pages
-@use "pages/home";
-@use "pages/bibliotheque";
-@use "pages/login";
-@use "pages/register";
-@use "pages/redirect";
+@use "./pages/home" as *;
+@use "./pages/bibliotheque" as *;
+@use "./pages/login" as *;
+@use "./pages/register" as *;
+@use "./pages/redirect" as *;

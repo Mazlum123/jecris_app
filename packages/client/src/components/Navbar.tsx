@@ -32,6 +32,9 @@ const Navbar = () => {
         <li>
           <Link to="/bibliotheque">Bibliothèque</Link>
         </li>
+        <li>
+          <Link to="/contact">Contact</Link>
+        </li>
 
         {isAuthenticated ? (
           <>
