@@ -1,4 +1,3 @@
-// src/components/Cart.tsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../stores/cartStore";
@@ -13,7 +12,7 @@ const Cart = () => {
   const { 
     items: cartItems, 
     removeFromCart, 
-    clearCart, 
+    // clearCart, 
     totalPrice,
     initializeCart,
     isLoading,
@@ -65,13 +64,13 @@ const Cart = () => {
     }
   };
 
-  const handleClearCart = async () => {
-    try {
-      await clearCart();
-    } catch (err) {
-      console.error("Erreur vidage:", err);
-    }
-  };
+  // const handleClearCart = async () => {
+  //   try {
+  //     await clearCart();
+  //   } catch (err) {
+  //     console.error("Erreur vidage:", err);
+  //   }
+  // };
 
   if (!isAuthenticated) {
     return (
@@ -149,13 +148,13 @@ const Cart = () => {
             <h3>Total : {totalPrice().toFixed(2)} €</h3>
 
             <div className="cart-actions">
-              <button
+              {/* <button
                 onClick={handleClearCart}
                 className="btn-secondary"
                 disabled={isLoading}
               >
                 Vider le panier
-              </button>
+              </button> */}
 
               <button
                 onClick={handleCheckout}

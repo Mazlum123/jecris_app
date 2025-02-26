@@ -112,8 +112,8 @@ const Home = () => {
               <div className="bento-card">
                 <h3>✍ Écrire et publier</h3>
                 <p>Créez, modifiez et publiez vos propres histoires.</p>
-                <Link to="/register" className="btn text">
-                  Commencer à écrire →
+                <Link to="#" className="btn text">
+                  BIENTÔT
                 </Link>
               </div>
 
