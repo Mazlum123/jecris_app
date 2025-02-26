@@ -97,7 +97,7 @@ export const addBook: RequestHandler = async (req: Request, res: Response) => {
             status: 'success',
             message: "Livre ajouté avec succès !",
             data: newBook[0],
-            book: newBook[0] // Pour compatibilité si nécessaire
+            book: newBook[0]
         });
     } catch (error) {
         console.error("🚨 ERREUR SQL :", error);
@@ -151,7 +151,7 @@ export const createBook = async (req: Request, res: Response): Promise<void> => 
             status: 'success',
             message: "Livre ajouté avec succès",
             data: newBook[0],
-            book: newBook[0] // Pour compatibilité si nécessaire
+            book: newBook[0]
         });
 
     } catch (error) {
@@ -196,7 +196,7 @@ export const updateBook = async (req: Request, res: Response): Promise<void> => 
             status: 'success',
             message: "Livre mis à jour.",
             data: updatedBook[0],
-            book: updatedBook[0] // Pour compatibilité si nécessaire
+            book: updatedBook[0]
         });
     } catch (error) {
         console.error("❌ Erreur mise à jour livre :", error);

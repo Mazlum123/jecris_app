@@ -32,8 +32,12 @@ const CookieBanner = () => {
           Politique de confidentialité
         </a>{" "}
         |{" "}
-        <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer">
+        <a href="/cgu.html" target="_blank" rel="noopener noreferrer">
           Conditions d'utilisation
+        </a>{" "}
+        |{" "}
+        <a href="/cgv.html" target="_blank" rel="noopener noreferrer">
+          Conditions Générales de Vente
         </a>
         .
       </p>

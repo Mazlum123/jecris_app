@@ -46,8 +46,8 @@ export const login = async (req: Request, res: Response) => {
         res.status(200).json({
             status: 'success',
             message: "Connexion réussie !",
-            token, // pour la compatibilité
-            username: user.email, // pour la compatibilité
+            token,
+            username: user.email,
             data: {
                 token,
                 user: {
@@ -188,7 +188,7 @@ export const handleGoogleAuth = async (req: Request, res: Response) => {
         res.status(200).json({
             status: 'success',
             message: isNewUser ? "Compte créé avec succès" : "Connexion réussie",
-            token: sessionToken, // pour la compatibilité
+            token: sessionToken,
             data: {
                 token: sessionToken,
                 isNewUser,

@@ -10,10 +10,8 @@ dotenv.config();
 
 const router = Router();
 
-// Modifions le typage
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
 
-// Wrapper pour convertir nos handlers en Promise<void>
 const asyncHandler = (handler: AsyncHandler) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {

@@ -26,8 +26,8 @@ const Register = () => {
 
     try {
       const response = await api.post<AuthResponse>("/auth/register", { 
-        email, 
-        password 
+        email,
+        password
       });
 
       if (response.data.status === 'success') {

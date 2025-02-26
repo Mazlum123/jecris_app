@@ -5,8 +5,7 @@ const Profil = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    // Récupère l'email depuis localStorage
-    const storedEmail = localStorage.getItem("userEmail"); // Assure-toi de stocker cet email à la connexion
+    const storedEmail = localStorage.getItem("userEmail");
     setUserEmail(storedEmail);
   }, []);
 

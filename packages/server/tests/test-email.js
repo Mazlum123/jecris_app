@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: `"Test Jecris" <${process.env.EMAIL_USER}>`,
-  to: "ton.adresse.email@gmail.com", // Remplace par ton adresse email
+  to: "adresse.email@gmail.com",
   subject: "Test d'envoi Nodemailer",
   text: "Ceci est un email de test envoyé via Nodemailer",
 };

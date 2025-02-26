@@ -78,7 +78,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.delete<ApiResponse<null>>(`/cart/${bookId}`);
-      
+
       if (response.data.status === 'success') {
         set((state) => ({
           items: state.items.filter(item => item.id !== bookId),
@@ -99,7 +99,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.delete<ApiResponse<null>>('/cart/clear');
-      
+
       if (response.data.status === 'success') {
         set({ items: [], error: null });
       }

@@ -81,7 +81,7 @@ const BibliothequePersonnelle = () => {
   return (
     <div className="bibliotheque-container">
       <h1>Ma Bibliothèque</h1>
-      
+
       <div className="books-grid">
       {userBooks.map((book: Book) => (
           <div key={book.id} className="book-card">
@@ -89,7 +89,7 @@ const BibliothequePersonnelle = () => {
               <h3>{book.title}</h3>
               <p className="book-author">par {book.author}</p>
               <p className="book-description">{book.description}</p>
-              
+
               <div className="book-actions">
                 {book.lastPageRead && book.lastPageRead > 1 ? (
                   <button

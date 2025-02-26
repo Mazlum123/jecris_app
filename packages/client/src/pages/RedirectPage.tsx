@@ -17,7 +17,6 @@ const RedirectPage = () => {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   useEffect(() => {
-    // Vérification de l'authentification pour les redirections post-login
     if (state?.type === "login" && !isAuthenticated) {
       navigate("/login");
       return;

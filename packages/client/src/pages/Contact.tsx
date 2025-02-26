@@ -38,7 +38,6 @@ const Contact = () => {
     <div className="contact-container">
       <h1>📬 Contactez-nous</h1>
 
-      {/* 💡 Affichage de ton email */}
       <p>Pour toute question, vous pouvez également nous écrire directement à : <strong>mazlum.morcicek.dev@gmail.com</strong></p>
 
       <form ref={form} onSubmit={sendEmail} className="contact-form">

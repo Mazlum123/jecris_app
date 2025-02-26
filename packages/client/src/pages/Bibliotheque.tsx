@@ -98,7 +98,7 @@ const Bibliotheque = () => {
   return (
     <div className="bibliotheque-container">
       <h1>📚 Bibliothèque Publique</h1>
-      
+
       {cartError && (
         <div className="error-message" role="alert">
           {cartError}

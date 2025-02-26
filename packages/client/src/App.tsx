@@ -7,7 +7,6 @@ const App = () => {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Vérifie que le message provient bien du même domaine
       if (event.origin !== window.location.origin) {
         console.warn("Message reçu d'un domaine non autorisé");
         return;

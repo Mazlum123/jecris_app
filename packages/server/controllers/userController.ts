@@ -15,7 +15,7 @@ export const getUsers = async (req: Request, res: Response) => {
             status: 'success',
             message: "Utilisateurs récupérés avec succès",
             data: allUsers,
-            users: allUsers // Pour compatibilité
+            users: allUsers
         });
     } catch (error) {
         res.status(500).json({
@@ -61,7 +61,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
             status: 'success',
             message: "Profil récupéré avec succès",
             data: userData[0],
-            user: userData[0] // Pour compatibilité
+            user: userData[0]
         });
     } catch (error) {
         console.error("Erreur getMe:", error);
@@ -113,7 +113,6 @@ export const updateMe = async (req: Request, res: Response): Promise<void> => {
             .update(users)
             .set({ 
                 email: email || req.user.email,
-                // Ajoutez d'autres champs à mettre à jour ici
             })
             .where(eq(users.id, req.user.id))
             .returning();
@@ -122,7 +121,7 @@ export const updateMe = async (req: Request, res: Response): Promise<void> => {
             status: 'success',
             message: "Profil mis à jour avec succès",
             data: updatedUser[0],
-            user: updatedUser[0] // Pour compatibilité
+            user: updatedUser[0]
         });
     } catch (error) {
         console.error("Erreur updateMe:", error);

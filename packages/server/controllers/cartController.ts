@@ -91,7 +91,7 @@ export const getCart: RequestHandler = async (req, res): Promise<void> => {
             status: 'success',
             message: "Panier récupéré avec succès",
             data: cartItems,
-            cartItems // Pour compatibilité
+            cartItems
         });
     } catch (error) {
         console.error("🚨 Erreur récupération panier :", error);

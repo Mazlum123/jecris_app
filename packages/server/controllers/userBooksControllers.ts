@@ -95,7 +95,7 @@ export const getUserBooks: RequestHandler = async (req, res) => {
             status: 'success',
             message: "Bibliothèque personnelle récupérée avec succès",
             data: ownedBooks,
-            ownedBooks // Pour compatibilité
+            ownedBooks
         });
     } catch (error) {
         console.error("🚨 Erreur récupération des livres possédés :", error);

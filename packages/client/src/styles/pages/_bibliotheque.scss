@@ -42,21 +42,18 @@
 
     .book-description {
       margin-bottom: 1rem;
-      // Solution moderne avec le conteneur flexible
       display: -webkit-box;
       display: -ms-flexbox;
       display: flex;
       -webkit-box-orient: vertical;
       -ms-flex-direction: column;
       flex-direction: column;
-      // Limitation des lignes
       overflow: hidden;
       -webkit-line-clamp: 3;
       line-clamp: 3;
-      max-height: 4.5em; // Fallback pour les navigateurs ne supportant pas line-clamp
+      max-height: 4.5em;
       position: relative;
 
-      // Fallback pour les navigateurs plus anciens
       &::after {
         content: '';
         position: absolute;
@@ -100,7 +97,7 @@
   }
 }
 
-// États
+// Loadings
 .auth-required,
 .loading-container,
 .error-container,

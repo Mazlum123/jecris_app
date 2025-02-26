@@ -63,7 +63,7 @@ export const createPayment = async (req: Request, res: Response): Promise<void> 
       status: 'success',
       message: "Session de paiement créée.",
       data: { sessionUrl: session.url },
-      url: session.url // Pour compatibilité
+      url: session.url
     });
 
   } catch (error) {

@@ -12,7 +12,7 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token.trim()}`; // Assurez-vous qu'il n'y a pas d'espaces supplémentaires
+    config.headers.Authorization = `Bearer ${token.trim()}`;
   }
   return config;
 }, (error) => {

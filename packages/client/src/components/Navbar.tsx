@@ -21,7 +21,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="container">
         <Link to="/" className="brand">
-          <img src="../../public/assets/logoT.png" alt="Jecris Logo" />
+          <img src="assets/logoT.png" alt="Jecris Logo" />
           <h1>Jecris</h1>
         </Link>
 

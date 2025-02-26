@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 const GoogleLoginButton = () => {
-  const navigate = useNavigate(); // ✅ Utilisation de useNavigate
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
@@ -25,9 +25,9 @@ const GoogleLoginButton = () => {
         localStorage.setItem("authToken", data.token);
 
         if (data.isNewUser) {
-          navigate('/set-password'); // ✅ Utilisation de navigate
+          navigate('/set-password');
         } else {
-          navigate('/dashboard'); // ✅ Utilisation de navigate
+          navigate('/dashboard');
         }
       } else {
         setError(data.error || "Erreur lors de l'authentification Google.");

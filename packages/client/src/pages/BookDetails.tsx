@@ -17,9 +17,9 @@ const BookDetails = () => {
   const { id } = useParams();
 
   const { data: book, error, isLoading } = useQuery<Book, Error>({
-    queryKey: ["book", id], // ✅ Ajout de `queryKey`
-    queryFn: () => fetchBook(id!), // ✅ Correction du typage
-    enabled: !!id, // ✅ S'assure que la requête n'est exécutée que si `id` existe
+    queryKey: ["book", id],
+    queryFn: () => fetchBook(id!),
+    enabled: !!id, // Pour s'assurer que la requête n'est exécutée que si `id` existe
   });
 
   if (isLoading) return <p>Chargement...</p>;
