@@ -1,53 +1,53 @@
-import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+// import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+// import { useNavigate } from 'react-router-dom';
+// import { useState } from 'react';
 
-const GoogleLoginButton = () => {
-  const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+// const GoogleLoginButton = () => {
+//   const navigate = useNavigate();
+//   const [error, setError] = useState<string | null>(null);
 
-  const handleSuccess = async (credentialResponse: CredentialResponse) => {
-    if (!credentialResponse.credential) {
-      setError("Aucun token reçu depuis Google.");
-      return;
-    }
+//   const handleSuccess = async (credentialResponse: CredentialResponse) => {
+//     if (!credentialResponse.credential) {
+//       setError("Aucun token reçu depuis Google.");
+//       return;
+//     }
 
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/google-auth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: credentialResponse.credential }),
-      });
+//     try {
+//       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/google-auth`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ token: credentialResponse.credential }),
+//       });
 
-      const data = await res.json();
+//       const data = await res.json();
 
-      if (res.ok) {
-        localStorage.setItem("authToken", data.token);
+//       if (res.ok) {
+//         localStorage.setItem("authToken", data.token);
 
-        if (data.isNewUser) {
-          navigate('/set-password');
-        } else {
-          navigate('/dashboard');
-        }
-      } else {
-        setError(data.error || "Erreur lors de l'authentification Google.");
-      }
-    } catch (err) {
-      console.error("Erreur lors de l'authentification Google :", err);
-      setError("Erreur serveur. Veuillez réessayer.");
-    }
-  };
+//         if (data.isNewUser) {
+//           navigate('/set-password');
+//         } else {
+//           navigate('/dashboard');
+//         }
+//       } else {
+//         setError(data.error || "Erreur lors de l'authentification Google.");
+//       }
+//     } catch (err) {
+//       console.error("Erreur lors de l'authentification Google :", err);
+//       setError("Erreur serveur. Veuillez réessayer.");
+//     }
+//   };
 
-  const handleError = () => {
-    setError("Échec de la connexion Google.");
-  };
+//   const handleError = () => {
+//     setError("Échec de la connexion Google.");
+//   };
 
-  return (
-    <div>
-      <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
-  );
-};
+//   return (
+//     <div>
+//       <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+//       {error && <p style={{ color: "red" }}>{error}</p>}
+//     </div>
+//   );
+// };
 
-export default GoogleLoginButton;
+// export default GoogleLoginButton;

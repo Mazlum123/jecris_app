@@ -26,12 +26,11 @@ console.log(`🔗 Client URL : ${CLIENT_URL}`);
 const app = express();
 
 // ✅ Stripe webhook - Doit rester avant express.json()
-// app.post('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }), handleWebhook);
 app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 
 // ✅ Middleware global
 app.use(express.json());
-app.use(passport.initialize()); 
+app.use(passport.initialize());
 
 // ✅ Gestion CORS
 const allowedOrigins = process.env.ALLOWED_ORIGINS
